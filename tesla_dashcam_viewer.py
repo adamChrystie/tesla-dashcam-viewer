@@ -1,42 +1,12 @@
 import sys
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QListWidget, QListWidgetItem, QMainWindow,
-    QSplitter, QFileDialog
-)
+    QApplication, QWidget, QLayout, QVBoxLayout, QHBoxLayout, QPushButton, QMainWindow, QFileDialog)
+
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtCore import Qt, QUrl
 
-class VideoWidget(QWidget):
-    def __init__(self, video_file, media_player):
-        super().__init__()
-        self.video_file = video_file
-        self.media_player = media_player
 
-        layout = QHBoxLayout()
-
-        # Label to display the video file name
-        self.label = QLabel(video_file.split('/')[-1])
-        layout.addWidget(self.label)
-
-        # Play/Pause button
-        self.play_pause_button = QPushButton("Play/Pause")
-        self.play_pause_button.clicked.connect(self.toggle_play_pause)
-        layout.addWidget(self.play_pause_button)
-
-        self.setLayout(layout)
-
-    def toggle_play_pause(self):
-        if self.media_player.source().toLocalFile() != self.video_file:
-            self.media_player.setSource(QUrl.fromLocalFile(self.video_file))
-            self.media_player.play()
-            self.play_pause_button.setText("Pause")
-        elif self.media_player.playbackState() == QMediaPlayer.PlayingState:
-            self.media_player.pause()
-            self.play_pause_button.setText("Play")
-        else:
-            self.media_player.play()
-            self.play_pause_button.setText("Pause")
+from ui.video_widget import VideoWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -59,17 +29,18 @@ class MainWindow(QMainWindow):
 
         # Video clip list column
         self.clip_list = QVBoxLayout()
+        self.clip_list.setSizeConstraint(QLayout.SetFixedSize)
 
         add_video_button = QPushButton("Add Video")
         add_video_button.clicked.connect(self.add_video)
         self.clip_list.addWidget(add_video_button)
 
         self.clip_list_widget = QVBoxLayout()
-        self.clip_list.addLayout(self.clip_list_widget)
+        self.clip_list.addLayout(self.clip_list_widget, stretch=0)
 
         clip_widget = QWidget()
         clip_widget.setLayout(self.clip_list)
-        main_layout.addWidget(clip_widget, 1)
+        main_layout.addWidget(clip_widget, stretch=1)
 
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
@@ -89,8 +60,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
     window = MainWindow()
     window.show()
-
     sys.exit(app.exec())
