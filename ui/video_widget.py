@@ -8,7 +8,10 @@ class VideoWidget(QWidget):
         self.video_file = video_file
         self.media_player = media_player
 
+        # Set up layout
         layout = QHBoxLayout()
+        layout.setSpacing(3)
+        layout.setContentsMargins(2, 4, 2, 4)
 
         # Label to display the video file name
         self.label = QLabel(video_file.split('/')[-1])
@@ -20,6 +23,36 @@ class VideoWidget(QWidget):
         layout.addWidget(self.play_pause_button)
 
         self.setLayout(layout)
+        self.set_style()
+
+    def set_style(self):
+        """Apply a stylesheet."""
+
+        qml = """
+        QWidget {
+                background-color: #f0f0f0;
+                border-radius: 10px;
+                border: 0px solid #d0d0d0;
+            }
+        QLabel {
+            font-size: 14px;
+            font-weight: normal;
+            background-color: #0078d7;
+            color: white;
+        }
+        QPushButton {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+        QPushButton:hover {
+            background-color: #005bb5;
+        }
+        """
+
+        self.setStyleSheet(qml)
 
     def toggle_play_pause(self):
         if self.media_player.source().toLocalFile() != self.video_file:
