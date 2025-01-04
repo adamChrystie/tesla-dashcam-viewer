@@ -1,12 +1,17 @@
 import sys
+
+import file_utils.video_events
+from constants import TESLAS_CAMERA_NAMES
+from file_utils.video_events import make_event_data_objects_for_a_dir_path
+
 from PySide6.QtWidgets import (
     QSizePolicy, QApplication, QWidget, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout,
     QPushButton, QMainWindow, QFileDialog, QFrame)
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QObject, Signal
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
-from ui.video_widget import VideoWidget, VideoEventWidget
+from ui.video_widget import VideoEventWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -14,15 +19,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Video Player Tool")
         self.setGeometry(0, 0, 1000, 600)
         #self.setStyleSheet("background-color: lightblue;")
-        self._camera_names = ['back', 'front', 'left', 'right']
-
+        self._camera_names = TESLAS_CAMERA_NAMES
         self.media_player_video_widget_dict = {}
         # Main layout
         main_widget = QWidget()
         main_layout = QHBoxLayout()
-
         # Video display area
-
         video_widget_frame = QFrame()
         video_widget_frame.setFrameShape(QFrame.Box)
         video_widget_frame.setLineWidth(3)
@@ -62,23 +64,21 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
 
     def add_video(self):
+        vide_files = []
         file_dialog = QFileDialog(self)
-        video_files, _ = QFileDialog.getOpenFileNames(
-            None, "Select Files", "", "All Files (*);;Text Files (*.txt);;Python Files (*.py)")
-        if video_files:
-            self.add_video_clip_widget(video_files)
-            print(f'Added video clip widget for:{','.join(video_files)}')
-
-        #file_dialog.setFileMode(QFileDialog.ExistingFile)
-        #file_dialog.setOption(QFileDialog.DontUseNativeDialog, True)
-        #file_dialog.setViewMode(QFileDialog.Detail)
-        #file_dialog.setNameFilter("Videos (*.mp4 *.avi *.mkv)")
-        # if file_dialog.exec():
-        #     video_files = file_dialog.selectedFiles()
+        dir_path = file_dialog.getExistingDirectory()
+        print('%%%%', dir_path)
+        if dir_path:
+            event_data_objs = make_event_data_objects_for_a_dir_path(dir_path)
+            for event_data in event_data_objs:
+                pass
+        # video_files, _ = QFileDialog.getOpenFileNames(
+        #     None, "Select Files", "", "All Files (*);;Text Files (*.txt);;Python Files (*.py)")
+        # if video_files:
         #     self.add_video_clip_widget(video_files)
+        #     print(f'Added video clip widget for:{','.join(video_files)}')
 
     def add_video_clip_widget(self, video_files):
-        #video_clip_widget = VideoWidget(video_file, self.media_player)
         video_clip_widget = VideoEventWidget("test", self.media_player_video_widget_dict, video_files)
         self.clip_list_widget.addWidget(video_clip_widget)
 
