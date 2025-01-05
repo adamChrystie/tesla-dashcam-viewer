@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton)
+from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton, QSlider)
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtCore import QUrl
 
@@ -11,8 +11,8 @@ class VideoEventWidget(QWidget):
         self._event_name = event_name
         self._backup_player = media_video_players['back']['media_player']
         self._front_upper_player = media_video_players['front']['media_player']
-        self._left_repeater_player = media_video_players['left']['media_player']
-        self._right_repeater_player = media_video_players['right']['media_player']
+        self._left_repeater_player = media_video_players['left_repeater']['media_player']
+        self._right_repeater_player = media_video_players['right_repeater']['media_player']
         self._video_files = video_files
         self.setup_ui()
 
@@ -96,5 +96,4 @@ class VideoEventWidget(QWidget):
             self.play_pause_button.setText("Pause")
 
         self._is_playing = not self._is_playing
-
 

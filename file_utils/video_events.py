@@ -4,6 +4,9 @@ import re
 from collections import defaultdict
 from pathlib import Path
 from pprint import pprint
+
+from PySide6.QtWidgets import QWidget
+
 from constants import TESLAS_CAMERA_NAMES
 
 
@@ -66,6 +69,7 @@ def make_event_data_objects_for_a_dir_path(dir_path: Path):
         event_data.update_camera_files_dict(video_file_paths)
         event_data_objs.append(event_data)
     return event_data_objs
+
 
 if __name__ == "__main__":
     dir_path = Path('/Volumes/ThunderBay/fileServer/Media_Center_Videos/TeslaCam/TeslaCam_imported_2024-12-18/SavedClips/2023-12-21_09-28-25')
