@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
 
         # Playback slider
         self.slider = QSlider(Qt.Horizontal)
+        frame_layout.addWidget(self.slider, 2, 0, 1, frame_layout.columnCount())
         self.slider.setRange(0, 1000)  # Set the range based on video duration later
         self.slider.sliderMoved.connect(self.on_slider_moved)
 
@@ -67,7 +68,6 @@ class MainWindow(QMainWindow):
         clip_widget = QWidget()
         clip_widget.setLayout(self.clip_list)
         main_layout.addWidget(clip_widget, stretch=1)
-        main_layout.addWidget(self.slider)
 
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
