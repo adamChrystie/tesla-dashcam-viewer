@@ -14,6 +14,7 @@ class VideoEventWidget(QWidget):
         self._left_repeater_player = media_video_players['left_repeater']['media_player']
         self._right_repeater_player = media_video_players['right_repeater']['media_player']
         self._video_files = video_files
+        self._is_liked = False
         self.setup_ui()
 
     @property
@@ -37,8 +38,23 @@ class VideoEventWidget(QWidget):
         self.play_pause_button = QPushButton("Play")
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         layout.addWidget(self.play_pause_button)
+
+        # Like/Heart Clip Button
+        self.like_clip_button = QPushButton("\u2764")  # Unicode for a heart icon
+        self.like_clip_button.clicked.connect(self.toggle_is_liked)
+        layout.addWidget(self.like_clip_button)
+
+        # Wrap up
         self.setLayout(layout)
         self.set_style()
+
+    def toggle_is_liked(self):
+        """Handle the heart button being pressed."""
+        self._is_liked = not self._is_liked
+        if self._is_liked:
+            self.like_clip_button.setStyleSheet("color: red;")
+        else:
+            self.like_clip_button.setStyleSheet("color: white;")
 
     def set_style(self):
         """Apply a stylesheet."""
