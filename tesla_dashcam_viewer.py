@@ -13,11 +13,13 @@ from PySide6.QtCore import Qt, QObject, Signal
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from ui.video_widget import VideoEventWidget
+from ui.timeline_slider import TimelineSliderWidget
+from ui.pop_up_info_window import InfoPopup
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Video Player Tool")
+        self.setWindowTitle("Tesla Dashcam Reviewer")
         self.setGeometry(0, 0, 1000, 600)
         self._camera_names = TESLAS_CAMERA_NAMES
         self.media_player_video_widget_dict = {}
@@ -44,21 +46,14 @@ class MainWindow(QMainWindow):
                                                  'audio_output': audio_output}
 
         # Playback slider
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = TimelineSliderWidget(self.media_player_video_widget_dict)
         frame_layout.addWidget(self.slider, 2, 0, 1, frame_layout.columnCount())
-        self.slider.setRange(0, 1000)  # Set the range based on video duration later
-        self.slider.sliderMoved.connect(self.on_slider_moved)
-        self.slider.sliderPressed.connect(self.on_slider_pressed)
-        self.slider.sliderReleased.connect(self.on_slider_released)
-        #self.slider.valueChanged.connect(self.on_slider_value_changed)
-
         self._main_player = self.media_player_video_widget_dict['front']['media_player']
         self._main_player.positionChanged.connect(self.update_slider)
         self._main_player.durationChanged.connect(self.update_slider_range)
 
         video_widget_frame.setLayout(frame_layout)
         main_layout.addWidget(video_widget_frame, 3)
-
         # Video clip list column
         self.clip_list = QVBoxLayout()
         self.clip_list.setSizeConstraint(QLayout.SetFixedSize)
@@ -98,54 +93,21 @@ class MainWindow(QMainWindow):
                 f_name = os.path.basename(src_fpath)
                 dst_fpath = os.path.join(dir_path, f_name)
                 shutil.copy2(src_fpath, dst_fpath)
-
-
-    def on_slider_pressed(self):
-        self.is_dragging = True
-        for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
-            media_player = self.media_player_video_widget_dict[camera_name]['media_player']
-            media_player.pause()
-
-    def on_slider_released(self):
-        self.is_dragging = False
-        duration = self._main_player.duration()  # Total video duration in milliseconds
-        if duration:
-            # Map the slider value to the video's position in milliseconds
-            #new_position = int((self.slider.value() / 1000) * duration)
-            new_position = int(self.slider.value())
-            for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
-                media_player = self.media_player_video_widget_dict[camera_name]['media_player']
-                media_player.setPosition(new_position)  # Seek to new position
-                media_player.play()
-
-    def on_slider_value_changed(self, value):
-        if self.is_dragging:
-            # Optionally: Throttle updates or visually sync slider without stuttering
-            pass
+            self.info_popup = InfoPopup(message='Done copying files.', parent=self)
+            self.info_popup.setHidden(False)
+            self.info_popup.show()
+            self.info_popup.raise_()
 
     def update_slider_range(self, duration):
         """Update the slider range when video duration changes."""
         self.slider.setRange(0, duration)
 
-    def on_slider_moved(self, position):
-        """Seek video when slider is moved."""
-        duration = self._main_player.duration()  # Get total video duration in milliseconds
-        if duration:
-            #new_position = int((position / 1000) * duration)
-            new_position = position
-            for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
-                media_player = self.media_player_video_widget_dict[camera_name]['media_player']
-                media_player.setPosition(new_position)  # Seek to new position
-
     def update_slider(self, position):
         """Update slider to match current video playback position."""
         duration = self._main_player.duration()
         if duration:
-            #slider_position = int((position / duration) * 1000)
             slider_position = position
-        #print(f'update_slider set slider position to:{slider_position}')
-        self.slider.setValue(slider_position)
-
+            self.slider.setValue(slider_position)
 
     def add_video(self):
         file_dialog = QFileDialog(self)

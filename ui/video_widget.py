@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton, QSlider)
-from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton)
 from PySide6.QtCore import QUrl
 
 class VideoEventWidget(QWidget):
