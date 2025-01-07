@@ -72,31 +72,53 @@ class MainWindow(QMainWindow):
         clip_widget = QWidget()
         clip_widget.setLayout(self.clip_list)
         main_layout.addWidget(clip_widget, stretch=1)
-
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
+    def pause_all_media_players(self):
+        """Pause all the media players."""
+        for widgets_dict in self.media_player_video_widget_dict.values():
+            widgets_dict['media_player'].pause()
+
     def copy_liked_videos(self):
         """Copy the liked videos to a specified directory."""
-        src_fpaths = []
+        self.pause_all_media_players()
+        info_messages = []
+        video_widgets = []
         for i in range(self.clip_list_widget.count()):
             item = self.clip_list_widget.itemAt(i)
             widget = item.widget()
             if isinstance(widget, VideoEventWidget):
                 if widget._is_liked:
-                    src_fpaths.extend(widget._video_files)
-
+                    video_widgets.append(widget)
         file_dialog = QFileDialog(self)
         dir_path = file_dialog.getExistingDirectory()
         if dir_path:
-            for src_fpath in src_fpaths:
-                f_name = os.path.basename(src_fpath)
-                dst_fpath = os.path.join(dir_path, f_name)
-                shutil.copy2(src_fpath, dst_fpath)
-            self.info_popup = InfoPopup(message='Done copying files.', parent=self)
-            self.info_popup.setHidden(False)
-            self.info_popup.show()
-            self.info_popup.raise_()
+            for widget in video_widgets:
+                for src_fpath in widget.video_files:
+                    f_name = os.path.basename(src_fpath)
+                    dst_dir_path = os.path.join(dir_path, widget.event_name)
+                    try:
+                        if not os.path.exists(dst_dir_path):
+                            os.makedirs(dst_dir_path)
+                        dst_fpath = os.path.join(dst_dir_path, f_name)
+                        raise OSError
+                        shutil.copy2(src_fpath, dst_fpath)
+                    except OSError:
+                        msg = f'There was an error copying file to {dst_dir_path} .'
+                        info_messages.append((msg))
+                        break
+
+        if info_messages:
+            info_messages.insert(0, 'Done copying videos but there were some issues.')
+            long_msg = ""
+            for msg in info_messages:
+                long_msg = long_msg + f'{msg}\n'
+
+            info_popup = InfoPopup(message=long_msg, parent=self)
+        else:
+            info_popup = InfoPopup(message='Done copying files.', parent=self)
+        info_popup.show()
 
     def update_slider_range(self, duration):
         """Update the slider range when video duration changes."""
@@ -110,6 +132,7 @@ class MainWindow(QMainWindow):
             self.slider.setValue(slider_position)
 
     def add_video(self):
+        self.pause_all_media_players()
         file_dialog = QFileDialog(self)
         dir_path = file_dialog.getExistingDirectory()
         if dir_path:
