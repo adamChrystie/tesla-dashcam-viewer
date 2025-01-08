@@ -1,5 +1,5 @@
 """Module related to handling video events on disk."""
-
+import glob
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -33,7 +33,7 @@ def get_all_videos_in_dir(dir_path: Path) -> list:
     if isinstance(dir_path, str):
         dir_path = Path(dir_path)
     files = []
-    for f in dir_path.glob('*.mp4'):
+    for f in dir_path.glob('**/*.mp4'):
         files.append(f)
     return files
 
