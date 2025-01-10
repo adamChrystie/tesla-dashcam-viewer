@@ -17,6 +17,12 @@ class VideoEventWidget(QWidget):
         self.setup_ui()
 
     @property
+    def video_files(self):
+        return self._video_files
+    @video_files.setter
+    def video_files(self, value):
+        self._video_files = value
+    @property
     def event_name(self):
         return self._event_name
     @event_name.setter
@@ -25,15 +31,19 @@ class VideoEventWidget(QWidget):
 
     def setup_ui(self):
         # Set up layout
+        #self.setMinimumSize(250, 70)
         layout = QHBoxLayout()
-        layout.setSpacing(3)
-        layout.setContentsMargins(2, 4, 2, 4)
+        #layout.setContentsMargins(2, 4, 2, 4)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # Label to display the video file name
         self.label = QLabel(self.event_name)
+        #self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         layout.addWidget(self.label)
+        #layout.addSpacing(3)
 
         # Play/Pause button
+        #layout.addStretch()
         self.play_pause_button = QPushButton("Play")
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         layout.addWidget(self.play_pause_button)
@@ -60,22 +70,20 @@ class VideoEventWidget(QWidget):
 
         qml = """
         QWidget {
+                font-size: 12px;
+                font-weight: normal;
                 background-color: #f0f0f0;
-                border-radius: 10px;
+                border-radius: 4px;
                 border: 0px solid #d0d0d0;
+                padding: 0px 0px;
             }
         QLabel {
-            font-size: 14px;
-            font-weight: normal;
             background-color: #0078d7;
             color: white;
         }
         QPushButton {
             background-color: #0078d7;
             color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
         }
         QPushButton:hover {
             background-color: #005bb5;

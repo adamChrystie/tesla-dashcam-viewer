@@ -1,6 +1,6 @@
 """A widget to scrub through the video timeline manually."""
 
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QSlider)
+from PySide6.QtWidgets import QSlider
 from PySide6.QtCore import Qt
 
 class TimelineSliderWidget(QSlider):

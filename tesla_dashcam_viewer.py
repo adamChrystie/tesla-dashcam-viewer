@@ -1,20 +1,19 @@
 import os.path
 import sys
 import shutil
-import file_utils.video_events
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
-from PySide6.QtWidgets import (
-    QSizePolicy, QApplication, QWidget, QLayout, QGridLayout, QHBoxLayout, QVBoxLayout,
-    QPushButton, QMainWindow, QFileDialog, QFrame, QSlider)
+from PySide6.QtWidgets import (QApplication, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout,
+    QPushButton, QMainWindow, QFileDialog, QFrame)
 
-from PySide6.QtCore import Qt, QObject, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from ui.video_widget import VideoEventWidget
 from ui.timeline_slider import TimelineSliderWidget
 from ui.pop_up_info_window import InfoPopup
+from ui.event_list_widget import ScrollableWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -55,23 +54,22 @@ class MainWindow(QMainWindow):
         video_widget_frame.setLayout(frame_layout)
         main_layout.addWidget(video_widget_frame, 3)
         # Video clip list column
-        self.clip_list = QVBoxLayout()
-        self.clip_list.setSizeConstraint(QLayout.SetFixedSize)
+        self.video_widget_layout = ScrollableWidget()
+        main_layout.addWidget(self.video_widget_layout, stretch=1)
+
+
+        self.command_buttons_vlayout = QVBoxLayout()
+        # self.command_buttons_vlayout.setSizeConstraint(QLayout.SetFixedSize)
 
         add_video_button = QPushButton("Scan A Directory For Videos")
         add_video_button.clicked.connect(self.add_video)
-        self.clip_list.addWidget(add_video_button)
+        self.command_buttons_vlayout.addWidget(add_video_button)
 
         copy_liked_videos_button = QPushButton("Copy Liked Events")
         copy_liked_videos_button.clicked.connect(self.copy_liked_videos)
-        self.clip_list.addWidget(copy_liked_videos_button)
+        self.command_buttons_vlayout.addWidget(copy_liked_videos_button)
+        main_layout.addLayout(self.command_buttons_vlayout)
 
-        self.clip_list_widget = QVBoxLayout()
-        self.clip_list.addLayout(self.clip_list_widget, stretch=0)
-
-        clip_widget = QWidget()
-        clip_widget.setLayout(self.clip_list)
-        main_layout.addWidget(clip_widget, stretch=1)
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
@@ -85,8 +83,8 @@ class MainWindow(QMainWindow):
         self.pause_all_media_players()
         info_messages = []
         video_widgets = []
-        for i in range(self.clip_list_widget.count()):
-            item = self.clip_list_widget.itemAt(i)
+        for i in range(self.video_widget_layout.count()):
+            item = self.video_widget_layout.itemAt(i)
             widget = item.widget()
             if isinstance(widget, VideoEventWidget):
                 if widget._is_liked:
@@ -102,7 +100,6 @@ class MainWindow(QMainWindow):
                         if not os.path.exists(dst_dir_path):
                             os.makedirs(dst_dir_path)
                         dst_fpath = os.path.join(dst_dir_path, f_name)
-                        raise OSError
                         shutil.copy2(src_fpath, dst_fpath)
                     except OSError:
                         msg = f'There was an error copying file to {dst_dir_path} .'
@@ -146,7 +143,7 @@ class MainWindow(QMainWindow):
 
     def add_video_clip_widget(self, event_name, video_files):
         video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
-        self.clip_list_widget.addWidget(video_clip_widget)
+        self.video_widget_layout.add_widget(video_clip_widget)
 
 
 
