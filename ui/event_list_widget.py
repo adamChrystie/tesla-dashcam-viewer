@@ -41,11 +41,11 @@ class ScrollableWidget(QWidget):
         # Adjust the container's minimum width based on the added widget
         self._adjust_width(widget)
 
-
     def _adjust_width(self, widget):
         """Adjust the container's width to fit the new widget."""
         widget_width = widget.sizeHint().width()
         current_width = self.container.minimumSizeHint().width()
         new_width = max(current_width, widget_width)
+        print(f'scroll list container minimum width:{new_width}')
         # Update the container's minimum width
         self.container.setMinimumWidth(new_width)

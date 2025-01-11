@@ -1,11 +1,11 @@
-import os.path
+import os
 import sys
 import shutil
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
 from PySide6.QtWidgets import (QApplication, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout,
-    QPushButton, QMainWindow, QFileDialog, QFrame)
+    QPushButton, QMainWindow, QFileDialog, QFrame, QSizePolicy)
 
 from PySide6.QtCore import Qt
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -19,7 +19,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Tesla Dashcam Reviewer")
-        self.setGeometry(0, 0, 1000, 600)
+        import platform
+        if platform.system() == "Windows":
+            self.setGeometry(0, 0,  1800 * 0.75, 940 * 0.75)
+        else:
+            self.setGeometry(0, 0, 1800, 940)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self._camera_names = TESLAS_CAMERA_NAMES
         self.media_player_video_widget_dict = {}
         self.is_dragging = False
@@ -56,11 +61,7 @@ class MainWindow(QMainWindow):
         # Video clip list column
         self.video_widget_layout = ScrollableWidget()
         main_layout.addWidget(self.video_widget_layout, stretch=1)
-
-
         self.command_buttons_vlayout = QVBoxLayout()
-        # self.command_buttons_vlayout.setSizeConstraint(QLayout.SetFixedSize)
-
         add_video_button = QPushButton("Scan A Directory For Videos")
         add_video_button.clicked.connect(self.add_video)
         self.command_buttons_vlayout.addWidget(add_video_button)
@@ -72,6 +73,7 @@ class MainWindow(QMainWindow):
 
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
+
 
     def pause_others(self):
         sender = self.sender()
@@ -156,8 +158,6 @@ class MainWindow(QMainWindow):
         video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
         video_clip_widget.play_pressed.connect(self.pause_others)
         self.video_widget_layout.add_widget(video_clip_widget)
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

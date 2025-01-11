@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton)
+from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy)
 from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
@@ -17,6 +17,7 @@ class VideoEventWidget(QWidget):
         self._video_files = video_files
         self._is_liked = False
         self.setup_ui()
+        print(f'Video Widget {self.event_name} size hint:{self.sizeHint()}')
 
     @property
     def video_files(self):
@@ -32,17 +33,16 @@ class VideoEventWidget(QWidget):
         self._event_name = value
 
     def setup_ui(self):
+        self.set_style()
         # Set up layout
-        #self.setMinimumSize(250, 70)
         layout = QHBoxLayout()
         #layout.setContentsMargins(2, 4, 2, 4)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.addSpacing(0)
 
         # Label to display the video file name
         self.label = QLabel(self.event_name)
-        #self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         layout.addWidget(self.label)
-        #layout.addSpacing(3)
 
         # Play/Pause button
         self.play_pause_button = QPushButton("Play")
@@ -53,10 +53,11 @@ class VideoEventWidget(QWidget):
         self.like_clip_button = QPushButton("\u2764")  # Unicode for a heart icon
         self.like_clip_button.clicked.connect(self.toggle_is_liked)
         layout.addWidget(self.like_clip_button)
-
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         # Wrap up
         self.setLayout(layout)
-        self.set_style()
+        self.adjustSize()
+        self.update()
 
     def toggle_is_liked(self):
         """Handle the heart button being pressed."""
@@ -68,13 +69,12 @@ class VideoEventWidget(QWidget):
 
     def set_style(self):
         """Apply a stylesheet."""
-
         qml = """
         QWidget {
                 font-size: 12px;
                 font-weight: normal;
                 background-color: #f0f0f0;
-                border-radius: 4px;
+                border-radius: 0px;
                 border: 0px solid #d0d0d0;
                 padding: 0px 0px;
             }
@@ -90,7 +90,6 @@ class VideoEventWidget(QWidget):
             background-color: #005bb5;
         }
         """
-
         self.setStyleSheet(qml)
 
     def toggle_play_pause(self):
@@ -119,8 +118,5 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.play()
             self._left_repeater_player.play()
             self._right_repeater_player.play()
-
-
-
         self._is_playing = not self._is_playing
 
