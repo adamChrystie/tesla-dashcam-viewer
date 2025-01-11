@@ -1,8 +1,10 @@
 from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton)
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
     """A single multi view video event to represent a specific time."""
+
+    play_pressed = Signal()
 
     def __init__(self, event_name: str, media_video_players: dict, video_files: list):
         super().__init__()
@@ -43,7 +45,6 @@ class VideoEventWidget(QWidget):
         #layout.addSpacing(3)
 
         # Play/Pause button
-        #layout.addStretch()
         self.play_pause_button = QPushButton("Play")
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         layout.addWidget(self.play_pause_button)
@@ -108,6 +109,8 @@ class VideoEventWidget(QWidget):
             self._right_repeater_player.pause()
             self.play_pause_button.setText("Play")
         else:
+            self.play_pressed.emit()
+            self.play_pause_button.setText("Pause")
             self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
             self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
             self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
@@ -116,7 +119,8 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.play()
             self._left_repeater_player.play()
             self._right_repeater_player.play()
-            self.play_pause_button.setText("Pause")
+
+
 
         self._is_playing = not self._is_playing
 

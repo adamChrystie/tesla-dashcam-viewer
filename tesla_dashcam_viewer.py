@@ -73,6 +73,17 @@ class MainWindow(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
+    def pause_others(self):
+        sender = self.sender()
+        for i in range(self.video_widget_layout.count()):
+            item = self.video_widget_layout.itemAt(i)
+            widget = item.widget()
+            if isinstance(widget, VideoEventWidget):
+                if widget != sender and widget.play_pause_button.text() == "Pause":
+                    widget.play_pause_button.click()  # Trigger a pause
+                    break # We only can have one actively playing VideoEventWidget. Exiting the loop dramatically
+                          # increases ui responsiveness. Verified via testing.
+
     def pause_all_media_players(self):
         """Pause all the media players."""
         for widgets_dict in self.media_player_video_widget_dict.values():
@@ -143,6 +154,7 @@ class MainWindow(QMainWindow):
 
     def add_video_clip_widget(self, event_name, video_files):
         video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
+        video_clip_widget.play_pressed.connect(self.pause_others)
         self.video_widget_layout.add_widget(video_clip_widget)
 
 
