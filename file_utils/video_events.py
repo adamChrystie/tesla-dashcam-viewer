@@ -1,12 +1,8 @@
 """Module related to handling video events on disk."""
-import glob
 import re
 from collections import defaultdict
 from pathlib import Path
-from pprint import pprint
-
-from PySide6.QtWidgets import QWidget
-
+from typing import Union
 from constants import TESLAS_CAMERA_NAMES
 
 
@@ -28,7 +24,7 @@ class VideoEventData(object):
                 if cam_name in video_fpath.name:
                     self._camera_files_dict[cam_name] = video_fpath
 
-def get_all_videos_in_dir(dir_path: Path) -> list:
+def get_all_videos_in_dir(dir_path: Union[Path, str]) -> list:
     """Given a directory return all the mp4 files in the dir as a list."""
     if isinstance(dir_path, str):
         dir_path = Path(dir_path)
@@ -58,7 +54,7 @@ def group_videos_by_timestamp(fpath_list):
             grouped_files[timestamp].append(f_path)
     return dict(grouped_files)
 
-def make_event_data_objects_for_a_dir_path(dir_path: Path):
+def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]):
     """ Given a directory, make a list of event data objects for each timestamp event."""
     video_files = get_all_videos_in_dir(dir_path)
     grouped_videos = group_videos_by_timestamp(video_files)
