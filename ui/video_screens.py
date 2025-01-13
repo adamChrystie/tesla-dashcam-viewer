@@ -26,8 +26,6 @@ class QVideoScreenGrid(QFrame):
         else:
             print(f'Siganture {args} not matched.')
 
-
-
     def columnCount(self):
         return self.video_frame_layout.columnCount()
 

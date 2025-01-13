@@ -60,16 +60,20 @@ class MainWindow(QMainWindow):
         main_hlayout.addWidget(self.video_widget_layout, stretch=1)
         self.command_buttons_hlayout = QHBoxLayout()
         add_video_button = QPushButton("Scan A Directory For Videos")
+        add_video_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         add_video_button.clicked.connect(self.add_video)
-        self.command_buttons_hlayout.addWidget(add_video_button, stretch=0)
+        self.command_buttons_hlayout.addWidget(add_video_button, alignment=Qt.AlignLeft)
         copy_liked_videos_button = QPushButton("Copy Liked Events")
+        copy_liked_videos_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         copy_liked_videos_button.clicked.connect(self.copy_liked_videos)
-        self.command_buttons_hlayout.addWidget(copy_liked_videos_button, stretch=0)
+        self.command_buttons_hlayout.addWidget(copy_liked_videos_button, alignment=Qt.AlignLeft)
+        self.command_buttons_hlayout.addStretch()
         main_vlayout.addLayout(self.command_buttons_hlayout)
         main_vlayout.addLayout(main_hlayout)
 
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
+
 
     def pause_others(self):
         sender = self.sender()

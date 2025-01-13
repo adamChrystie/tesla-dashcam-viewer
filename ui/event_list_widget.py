@@ -37,7 +37,7 @@ class ScrollableWidget(QWidget):
 
     def add_widget(self, widget):
         """Add a widget to the container layout."""
-        self.container_layout.addWidget(widget)
+        self.container_layout.addWidget(widget, stretch=1)
         # Adjust the container's minimum width based on the added widget
         self._adjust_width(widget)
 

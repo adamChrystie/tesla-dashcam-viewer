@@ -1,7 +1,7 @@
 """A widget to scrub through the video timeline manually."""
 
 from PySide6.QtWidgets import QSlider
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 
 class TimelineSliderWidget(QSlider):
     def __init__(self, media_player_video_widget_dict, orientation=Qt.Horizontal, parent=None):
@@ -12,8 +12,9 @@ class TimelineSliderWidget(QSlider):
         self.arrow_key_pressed = False
         self.media_player_video_widget_dict = media_player_video_widget_dict
         self.main_player = media_player_video_widget_dict['front']['media_player']
-        self.setup_connections()
         self.setup_ui()
+        self.setup_connections()
+
 
     def keyPressEvent(self, event):
         print(f'{event}')
@@ -90,15 +91,16 @@ class TimelineSliderWidget(QSlider):
 
     def on_slider_value_changed(self, value):
         if self.is_dragging:
+            # This is being detected.
             # Optionally: Throttle updates or visually sync slider without stuttering
-            print(f'on_slider_value_changed: Reacting to a drag')
+            #print(f'on_slider_value_changed: Reacting to a drag')
+            pass
         elif self.arrow_key_pressed:
-            duration = self.main_player.duration()  # Get total video duration in milliseconds
-            if duration:
-                # new_position = int((position / 1000) * duration)
-                new_position = value
-                for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
-                    media_player = self.media_player_video_widget_dict[camera_name]['media_player']
-                    media_player.pause()
-                    media_player.setPosition(new_position)  # Seek to new position
-                    media_player.pause()
+            # This is being detected..just need to find a good way to have video widgets update
+            # as arrow key is pressed or held down.
+            pass
+
+    def update_video(self):
+        pass
+
+
