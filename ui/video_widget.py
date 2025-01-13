@@ -6,8 +6,8 @@ class VideoEventWidget(QWidget):
 
     play_pressed = Signal()
 
-    def __init__(self, event_name: str, media_video_players: dict, video_files: list):
-        super().__init__()
+    def __init__(self, event_name: str, media_video_players: dict, video_files: list, parent=None):
+        super().__init__(parent=parent)
         self._is_playing = False
         self._event_name = event_name
         self._backup_player = media_video_players['back']['media_player']
@@ -17,7 +17,7 @@ class VideoEventWidget(QWidget):
         self._video_files = video_files
         self._is_liked = False
         self.setup_ui()
-        print(f'Video Widget {self.event_name} size hint:{self.sizeHint()}')
+        #print(f'Video Widget {self.event_name} size hint:{self.sizeHint()}')
 
     @property
     def video_files(self):

@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QScrollArea,
 
 class ScrollableWidget(QWidget):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         # Create a vertical layout for the custom widget
         self.layout = QVBoxLayout(self)
@@ -46,6 +46,6 @@ class ScrollableWidget(QWidget):
         widget_width = widget.sizeHint().width()
         current_width = self.container.minimumSizeHint().width()
         new_width = max(current_width, widget_width)
-        print(f'scroll list container minimum width:{new_width}')
+        #print(f'scroll list container minimum width:{new_width}')
         # Update the container's minimum width
         self.container.setMinimumWidth(new_width)

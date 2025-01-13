@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 import shutil
 from constants import TESLAS_CAMERA_NAMES
@@ -14,12 +15,12 @@ from ui.video_widget import VideoEventWidget
 from ui.timeline_slider import TimelineSliderWidget
 from ui.pop_up_info_window import InfoPopup
 from ui.event_list_widget import ScrollableWidget
+from ui.video_screens import QVideoScreenGrid
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Tesla Dashcam Reviewer")
-        import platform
         if platform.system() == "Windows":
             self.setGeometry(0, 0,  1800 * 0.75, 940 * 0.75)
         else:
@@ -30,17 +31,16 @@ class MainWindow(QMainWindow):
         self.is_dragging = False
         # Main layout
         main_widget = QWidget()
-        main_layout = QHBoxLayout()
+        main_vlayout = QVBoxLayout()
+        main_hlayout = QHBoxLayout()
+
         # Video display area
-        video_widget_frame = QFrame()
-        video_widget_frame.setFrameShape(QFrame.Box)
-        video_widget_frame.setLineWidth(3)
-        frame_layout = QGridLayout(video_widget_frame)
-        frame_layout.setContentsMargins(0, 0, 0, 0)
+        self.video_screens = QVideoScreenGrid()
+        main_hlayout.addWidget(self.video_screens, 3)
         for count, camera_name in enumerate(self._camera_names):
             video_widget = QVideoWidget()
             video_widget.setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatio)
-            frame_layout.addWidget(video_widget, count // 2, count % 2)
+            self.video_screens.addWidget(video_widget, count // 2, count % 2)
             media_player = QMediaPlayer()
             audio_output = QAudioOutput()
             audio_output.setMuted(True)
@@ -51,29 +51,25 @@ class MainWindow(QMainWindow):
 
         # Playback slider
         self.slider = TimelineSliderWidget(self.media_player_video_widget_dict)
-        frame_layout.addWidget(self.slider, 2, 0, 1, frame_layout.columnCount())
+        self.video_screens.addWidget(self.slider, 2, 0, 1, self.video_screens.columnCount())
         self._main_player = self.media_player_video_widget_dict['front']['media_player']
         self._main_player.positionChanged.connect(self.update_slider)
         self._main_player.durationChanged.connect(self.update_slider_range)
-
-        video_widget_frame.setLayout(frame_layout)
-        main_layout.addWidget(video_widget_frame, 3)
         # Video clip list column
         self.video_widget_layout = ScrollableWidget()
-        main_layout.addWidget(self.video_widget_layout, stretch=1)
-        self.command_buttons_vlayout = QVBoxLayout()
+        main_hlayout.addWidget(self.video_widget_layout, stretch=1)
+        self.command_buttons_hlayout = QHBoxLayout()
         add_video_button = QPushButton("Scan A Directory For Videos")
         add_video_button.clicked.connect(self.add_video)
-        self.command_buttons_vlayout.addWidget(add_video_button)
-
+        self.command_buttons_hlayout.addWidget(add_video_button, stretch=0)
         copy_liked_videos_button = QPushButton("Copy Liked Events")
         copy_liked_videos_button.clicked.connect(self.copy_liked_videos)
-        self.command_buttons_vlayout.addWidget(copy_liked_videos_button)
-        main_layout.addLayout(self.command_buttons_vlayout)
+        self.command_buttons_hlayout.addWidget(copy_liked_videos_button, stretch=0)
+        main_vlayout.addLayout(self.command_buttons_hlayout)
+        main_vlayout.addLayout(main_hlayout)
 
-        main_widget.setLayout(main_layout)
+        main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
-
 
     def pause_others(self):
         sender = self.sender()
