@@ -5,8 +5,8 @@ import shutil
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
-from PySide6.QtWidgets import (QApplication, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout,
-    QPushButton, QMainWindow, QFileDialog, QFrame, QSizePolicy)
+from PySide6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout,
+    QPushButton, QMainWindow, QFileDialog, QSizePolicy)
 
 from PySide6.QtCore import Qt
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -21,11 +21,15 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Tesla Dashcam Reviewer")
+        self._main_window_width = 1765
+        self.main_window_height = 1080
         if platform.system() == "Windows":
-            self.setGeometry(0, 0,  1800 * 0.75, 940 * 0.75)
+            #self.setGeometry(0, 0,  self._main_window_width * 0.70, self.main_window_height * 0.70)
+            self.setFixedSize(int(self._main_window_width * 0.70), int(self.main_window_height * 0.70))
         else:
-            self.setGeometry(0, 0, 1800, 940)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            #self.setGeometry(0, 0, self._main_window_width, self.main_window_height)
+            self.setFixedSize(self._main_window_width, self.main_window_height)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self._camera_names = TESLAS_CAMERA_NAMES
         self.media_player_video_widget_dict = {}
         self.is_dragging = False
@@ -46,18 +50,17 @@ class MainWindow(QMainWindow):
             audio_output.setMuted(True)
             media_player.setAudioOutput(audio_output)
             media_player.setVideoOutput(video_widget)
-            self.media_player_video_widget_dict[camera_name] = {'video_widget': video_widget, 'media_player': media_player,
-                                                 'audio_output': audio_output}
+            self.media_player_video_widget_dict[camera_name] = {
+                'video_widget': video_widget, 'media_player': media_player, 'audio_output': audio_output}
 
         # Playback slider
         self.slider = TimelineSliderWidget(self.media_player_video_widget_dict)
-        self.video_screens.addWidget(self.slider, 2, 0, 1, self.video_screens.columnCount())
         self._main_player = self.media_player_video_widget_dict['front']['media_player']
         self._main_player.positionChanged.connect(self.update_slider)
         self._main_player.durationChanged.connect(self.update_slider_range)
         # Video clip list column
         self.video_widget_layout = ScrollableWidget()
-        main_hlayout.addWidget(self.video_widget_layout, stretch=1)
+        main_hlayout.addWidget(self.video_widget_layout, stretch=True)
         self.command_buttons_hlayout = QHBoxLayout()
         add_video_button = QPushButton("Scan A Directory For Videos")
         add_video_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -70,10 +73,14 @@ class MainWindow(QMainWindow):
         self.command_buttons_hlayout.addStretch()
         main_vlayout.addLayout(self.command_buttons_hlayout)
         main_vlayout.addLayout(main_hlayout)
-
+        main_vlayout.addWidget(self.slider, stretch=0)
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
 
+    def resizeEvent(self, event):
+        size = self.size()
+        print(f'MainWindows size is now: width = {size.width()} height = {size.height()}')
+        super().resizeEvent(event)
 
     def pause_others(self):
         sender = self.sender()
@@ -81,7 +88,7 @@ class MainWindow(QMainWindow):
             item = self.video_widget_layout.itemAt(i)
             widget = item.widget()
             if isinstance(widget, VideoEventWidget):
-                if widget != sender and widget.play_pause_button.text() == "Pause":
+                if widget != sender and widget.play_pause_button.text() == " Pause ":
                     widget.play_pause_button.click()  # Trigger a pause
                     break # We only can have one actively playing VideoEventWidget. Exiting the loop dramatically
                           # increases ui responsiveness. Verified via testing.
@@ -100,7 +107,7 @@ class MainWindow(QMainWindow):
             item = self.video_widget_layout.itemAt(i)
             widget = item.widget()
             if isinstance(widget, VideoEventWidget):
-                if widget._is_liked:
+                if widget.is_liked:
                     video_widgets.append(widget)
         file_dialog = QFileDialog(self)
         dir_path = file_dialog.getExistingDirectory()
@@ -149,9 +156,9 @@ class MainWindow(QMainWindow):
             event_data_objs = make_event_data_objects_for_a_dir_path(dir_path)
             for event_data in event_data_objs:
                 vide_files = []
-                for camera_name, video_fpath in event_data._camera_files_dict.items():
+                for camera_name, video_fpath in event_data.camera_files_dict.items():
                     vide_files.append(video_fpath.as_posix())
-                event_name = event_data._timestamp
+                event_name = event_data.timestamp
                 self.add_video_clip_widget(event_name, vide_files)
 
     def add_video_clip_widget(self, event_name, video_files):

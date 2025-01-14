@@ -17,6 +17,14 @@ class VideoEventData(object):
         self._event_name = None
         self._camera_files_dict = defaultdict(Path)
 
+    @property
+    def camera_files_dict(self):
+        return self._camera_files_dict
+
+    @property
+    def timestamp(self):
+        return self._timestamp
+
     def update_camera_files_dict(self, video_file_paths):
         """ Setup the dictionary mapping camera names to their video file paths."""
         for cam_name in TESLAS_CAMERA_NAMES:

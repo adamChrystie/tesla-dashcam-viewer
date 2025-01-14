@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy)
+from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy
 from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
@@ -17,7 +18,12 @@ class VideoEventWidget(QWidget):
         self._video_files = video_files
         self._is_liked = False
         self.setup_ui()
+        self.setup_connections()
         #print(f'Video Widget {self.event_name} size hint:{self.sizeHint()}')
+
+    @property
+    def is_liked(self):
+        return self._is_liked
 
     @property
     def video_files(self):
@@ -36,28 +42,37 @@ class VideoEventWidget(QWidget):
         self.set_style()
         # Set up layout
         layout = QHBoxLayout()
-        #layout.setContentsMargins(2, 4, 2, 4)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(1, 2, 1, 2)
+        #layout.setContentsMargins(0, 0, 0, 0)
         layout.addSpacing(0)
-
         # Label to display the video file name
         self.label = QLabel(self.event_name)
+        self.label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.label)
-
         # Play/Pause button
-        self.play_pause_button = QPushButton("Play")
-        self.play_pause_button.clicked.connect(self.toggle_play_pause)
+        self.play_pause_button = QPushButton(" Play ")
+        self.play_pause_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.play_pause_button)
-
         # Like/Heart Clip Button
-        self.like_clip_button = QPushButton("\u2764")  # Unicode for a heart icon
-        self.like_clip_button.clicked.connect(self.toggle_is_liked)
+        self.like_clip_button = QPushButton(" \u2764 ")  # Unicode for a heart icon
+        self.like_clip_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.like_clip_button)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         # Wrap up
+        layout.addStretch()
         self.setLayout(layout)
-        self.adjustSize()
-        self.update()
+        #self.adjustSize()
+        #self.update()
+
+    def setup_connections(self):
+        self.play_pause_button.clicked.connect(self.toggle_play_pause)
+        self.like_clip_button.clicked.connect(self.toggle_is_liked)
+        self._front_upper_player.mediaStatusChanged.connect(self.handle_media_status_change)
+
+    def handle_media_status_change(self, status):
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
+            if self._is_playing:
+                self.toggle_play_pause()
 
     def toggle_is_liked(self):
         """Handle the heart button being pressed."""
@@ -66,31 +81,6 @@ class VideoEventWidget(QWidget):
             self.like_clip_button.setStyleSheet("color: red;")
         else:
             self.like_clip_button.setStyleSheet("color: white;")
-
-    def set_style(self):
-        """Apply a stylesheet."""
-        qml = """
-        QWidget {
-                font-size: 12px;
-                font-weight: normal;
-                background-color: #f0f0f0;
-                border-radius: 0px;
-                border: 0px solid #d0d0d0;
-                padding: 0px 0px;
-            }
-        QLabel {
-            background-color: #0078d7;
-            color: white;
-        }
-        QPushButton {
-            background-color: #0078d7;
-            color: white;
-        }
-        QPushButton:hover {
-            background-color: #005bb5;
-        }
-        """
-        self.setStyleSheet(qml)
 
     def toggle_play_pause(self):
         """
@@ -106,10 +96,10 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.pause()
             self._left_repeater_player.pause()
             self._right_repeater_player.pause()
-            self.play_pause_button.setText("Play")
+            self.play_pause_button.setText(" Play ")
         else:
             self.play_pressed.emit()
-            self.play_pause_button.setText("Pause")
+            self.play_pause_button.setText(" Pause ")
             self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
             self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
             self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
@@ -119,4 +109,29 @@ class VideoEventWidget(QWidget):
             self._left_repeater_player.play()
             self._right_repeater_player.play()
         self._is_playing = not self._is_playing
+
+    def set_style(self):
+        """Apply a stylesheet."""
+        qml = """
+        QWidget {
+                font-size: 14px;
+                font-weight: normal;
+                background-color: #f0f0f0;
+                border-radius: 4px;
+                border: 0px solid #d0d0d0;
+                padding: 4px 0px;
+            }
+        QLabel {
+            background-color: #0078d7;
+            color: white;
+        }
+        QPushButton {
+            background-color: #0078d7;
+            color: white;
+        }
+        QPushButton:hover {
+            background-color: #005bb5;
+        }
+        """
+        self.setStyleSheet(qml)
 

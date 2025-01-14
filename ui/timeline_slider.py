@@ -17,7 +17,6 @@ class TimelineSliderWidget(QSlider):
 
 
     def keyPressEvent(self, event):
-        print(f'{event}')
         if event.key() == Qt.Key_Left:
             self.arrow_key_pressed = True
             self.decrease_time()

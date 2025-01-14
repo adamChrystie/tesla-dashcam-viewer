@@ -1,6 +1,5 @@
 """A widget to hold the four video playback widgets."""
-from PySide6.QtWidgets import (QWidget, QGridLayout, QHBoxLayout, QVBoxLayout,
-                               QFrame, QSizePolicy)
+from PySide6.QtWidgets import QGridLayout, QFrame
 
 class QVideoScreenGrid(QFrame):
     def __init__(self, parent=None):
@@ -18,13 +17,7 @@ class QVideoScreenGrid(QFrame):
 
     def addWidget(self, *args):
         """Add a QVideoWidget to the QGridLayout."""
-        #print(args)
-        if len(args) == 3:
-            self.video_frame_layout.addWidget(args[0], args[1], args[2])
-        elif len(args) == 5:
-            self.video_frame_layout.addWidget(args[0], args[1], args[2], args[3], args[4])
-        else:
-            print(f'Siganture {args} not matched.')
+        self.video_frame_layout.addWidget(*args)
 
     def columnCount(self):
         return self.video_frame_layout.columnCount()
