@@ -5,8 +5,9 @@ import shutil
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
-from PySide6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout,
-    QPushButton, QMainWindow, QFileDialog, QSizePolicy)
+from PySide6.QtWidgets import (
+    QApplication, QWidget, QHBoxLayout, QVBoxLayout,QMainWindow,
+    QFileDialog, QSizePolicy)
 
 from PySide6.QtCore import Qt
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -16,6 +17,7 @@ from ui.timeline_slider import TimelineSliderWidget
 from ui.pop_up_info_window import InfoPopup
 from ui.event_list_widget import ScrollableWidget
 from ui.video_screens import QVideoScreenGrid
+from ui.main_window_widgets import CommandButtonsRow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -58,22 +60,14 @@ class MainWindow(QMainWindow):
         self._main_player = self.media_player_video_widget_dict['front']['media_player']
         self._main_player.positionChanged.connect(self.update_slider)
         self._main_player.durationChanged.connect(self.update_slider_range)
+
         # Video clip list column
         self.video_widget_layout = ScrollableWidget()
         main_hlayout.addWidget(self.video_widget_layout, stretch=True)
-        self.command_buttons_hlayout = QHBoxLayout()
-        add_video_button = QPushButton("Scan A Directory For Videos")
-        add_video_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        add_video_button.clicked.connect(self.add_video)
-        self.command_buttons_hlayout.addWidget(add_video_button, alignment=Qt.AlignLeft)
-        copy_liked_videos_button = QPushButton("Copy Liked Events")
-        copy_liked_videos_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        copy_liked_videos_button.clicked.connect(self.copy_liked_videos)
-        self.command_buttons_hlayout.addWidget(copy_liked_videos_button, alignment=Qt.AlignLeft)
-        self.command_buttons_hlayout.addStretch()
-        main_vlayout.addLayout(self.command_buttons_hlayout)
+        command_buttons_row = CommandButtonsRow(self.add_video, self.copy_liked_videos)
+        main_vlayout.addWidget(command_buttons_row)
         main_vlayout.addLayout(main_hlayout)
-        main_vlayout.addWidget(self.slider, stretch=0)
+        main_vlayout.addWidget(self.slider, stretch=False)
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
 

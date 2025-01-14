@@ -13,6 +13,7 @@ class QVideoScreenGrid(QFrame):
         self.setLineWidth(2)
         self.video_frame_layout = QGridLayout(self)
         self.video_frame_layout.setContentsMargins(0, 0, 0, 0)
+        self.video_frame_layout.setSpacing(0)
         self.setLayout(self.video_frame_layout)
 
     def addWidget(self, *args):

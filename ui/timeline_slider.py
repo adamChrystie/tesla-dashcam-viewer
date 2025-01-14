@@ -1,11 +1,12 @@
 """A widget to scrub through the video timeline manually."""
 
 from PySide6.QtWidgets import QSlider
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QRect, QSize
+from PySide6.QtGui import QPainter, QColor
 
 class TimelineSliderWidget(QSlider):
     def __init__(self, media_player_video_widget_dict, orientation=Qt.Horizontal, parent=None):
-        super(TimelineSliderWidget, self).__init__(orientation, parent=parent)
+        super().__init__(orientation, parent=parent)
         # Flag to see if timeline is being manually scrolled.
         self.is_dragging = False
         # Flag to track if an arrow key is pressed
@@ -101,5 +102,31 @@ class TimelineSliderWidget(QSlider):
 
     def update_video(self):
         pass
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        self.setStyleSheet("QSlider::handle { background: transparent; }")
+        painter = QPainter(self)
+
+        # Set the desired size for the handle (circle)
+        handle_size = 18  # Diameter of the circle
+        handle_pos = (self.valueToPosition(self.value()) - handle_size // 2) + handle_size / 2
+
+        # Create a square rectangle for the circle
+        handle_rect = QRect(handle_pos, (self.height() - handle_size) // 2, handle_size, handle_size)
+
+        # Draw the handle as a circle
+        painter.setBrush(QColor(71, 149, 179))  # Handle color
+        painter.drawEllipse(handle_rect)  # Draw the circle
+
+    def valueToPosition(self, value):
+        """Convert the slider value to the corresponding position."""
+        return int((value - self.minimum()) / (self.maximum() - self.minimum()) * (self.width() - 9))
+
+
+    def sizeHint(self):
+       """Override sizeHint to provide enough space for the circular handle."""
+       return QSize(super().sizeHint().width(), 20)  # Adjust height as needed
+
 
 
