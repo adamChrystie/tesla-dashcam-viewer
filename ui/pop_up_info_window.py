@@ -12,7 +12,7 @@ class InfoPopup(QWidget):
         # Set the window flags for a floating, always-on-top window
         self.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
         self.setWindowTitle(title)
-        #self.setFixedSize(300, 150)
+        self.setFixedSize(400, 250)
         # Create and set a layout with a label
         layout = QVBoxLayout()
         label = QLabel(message)
