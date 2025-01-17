@@ -19,7 +19,6 @@ class VideoEventWidget(QWidget):
         self._is_liked = False
         self.setup_ui()
         self.setup_connections()
-        #print(f'Video Widget {self.event_name} size hint:{self.sizeHint()}')
 
     @property
     def is_liked(self):
@@ -61,8 +60,7 @@ class VideoEventWidget(QWidget):
         # Wrap up
         layout.addStretch()
         self.setLayout(layout)
-        #self.adjustSize()
-        #self.update()
+
 
     def setup_connections(self):
         self.play_pause_button.clicked.connect(self.toggle_play_pause)

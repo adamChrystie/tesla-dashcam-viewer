@@ -16,7 +16,6 @@ class TimelineSliderWidget(QSlider):
         self.setup_ui()
         self.setup_connections()
 
-
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
             self.arrow_key_pressed = True
@@ -25,7 +24,7 @@ class TimelineSliderWidget(QSlider):
             self.arrow_key_pressed = True
             self.increase_time()
         else:
-            super(TimelineSliderWidget, self).keyPressEvent(event)  # Call base class method for other keys
+            super().keyPressEvent(event)  # Call base class method for other keys
 
     def keyReleaseEvent(self, event):
         if event.key() in (Qt.Key_Left, Qt.Key_Right):
@@ -33,7 +32,8 @@ class TimelineSliderWidget(QSlider):
             for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
                 media_player = self.media_player_video_widget_dict[camera_name]['media_player']
                 media_player.play()
-        super(TimelineSliderWidget, self).keyReleaseEvent(event)  # Call base class method
+        else:
+            super().keyReleaseEvent(event)  # Call base class method
 
     def decrease_time(self):
         current_value = self.value()
@@ -54,12 +54,13 @@ class TimelineSliderWidget(QSlider):
         self.sliderPressed.connect(self.on_slider_pressed)
         self.sliderReleased.connect(self.on_slider_released)
         self.valueChanged.connect(self.on_slider_value_changed)
-        self.timer.timeout.connect(self.update_video)
+        #self.timer.timeout.connect(self.update_video)
 
     def setup_ui(self):
+        self.setFocusPolicy(Qt.StrongFocus)
         self.setRange(0, 1000)  # Set the range based on video duration later
         # Create a timer for continuous updates
-        self.timer = QTimer()
+        #self.timer = QTimer()
 
     def on_slider_pressed(self):
         self.is_dragging = True
@@ -100,21 +101,18 @@ class TimelineSliderWidget(QSlider):
             # as arrow key is pressed or held down.
             pass
 
-    def update_video(self):
-        pass
+    # def update_video(self):
+    #     pass
 
     def paintEvent(self, event):
         super().paintEvent(event)
         self.setStyleSheet("QSlider::handle { background: transparent; }")
         painter = QPainter(self)
-
         # Set the desired size for the handle (circle)
         handle_size = 18  # Diameter of the circle
         handle_pos = (self.valueToPosition(self.value()) - handle_size // 2) + handle_size / 2
-
         # Create a square rectangle for the circle
         handle_rect = QRect(handle_pos, (self.height() - handle_size) // 2, handle_size, handle_size)
-
         # Draw the handle as a circle
         painter.setBrush(QColor(71, 149, 179))  # Handle color
         painter.drawEllipse(handle_rect)  # Draw the circle
@@ -122,7 +120,6 @@ class TimelineSliderWidget(QSlider):
     def valueToPosition(self, value):
         """Convert the slider value to the corresponding position."""
         return int((value - self.minimum()) / (self.maximum() - self.minimum()) * (self.width() - 9))
-
 
     def sizeHint(self):
        """Override sizeHint to provide enough space for the circular handle."""

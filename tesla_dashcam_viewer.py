@@ -9,9 +9,11 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,QMainWindow,
     QFileDialog, QSizePolicy)
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
+from PySide6.QtGui import QScreen
+
 from ui.video_widget import VideoEventWidget
 from ui.timeline_slider import TimelineSliderWidget
 from ui.pop_up_info_window import InfoPopup
@@ -22,19 +24,19 @@ from ui.main_window_widgets import CommandButtonsRow
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Tesla Dashcam Reviewer")
-        self._main_window_width = 1765
-        self.main_window_height = 1080
-        if platform.system() == "Windows":
-            #self.setGeometry(0, 0,  self._main_window_width * 0.70, self.main_window_height * 0.70)
-            self.setFixedSize(int(self._main_window_width * 0.70), int(self.main_window_height * 0.70))
-        else:
-            #self.setGeometry(0, 0, self._main_window_width, self.main_window_height)
-            self.setFixedSize(self._main_window_width, self.main_window_height)
+        self.is_dragging = False
+        screen = QScreen.availableGeometry(QApplication.primaryScreen())
+        self.aspect_ratio = 1.63
+        startup_height = int(screen.height() * 0.9)
+        startup_width = int(startup_height * self.aspect_ratio)
+        x = (screen.width() - startup_width) // 2
+        y = (screen.height() - startup_height) // 2
+        # MainWindows appears in center of display using 90% of height, width is based on
+        # desired UI aspect ratio.
+        self.setGeometry(x, y, startup_width, startup_height)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self._camera_names = TESLAS_CAMERA_NAMES
         self.media_player_video_widget_dict = {}
-        self.is_dragging = False
         # Main layout
         main_widget = QWidget()
         main_vlayout = QVBoxLayout()
@@ -70,11 +72,16 @@ class MainWindow(QMainWindow):
         main_vlayout.addWidget(self.slider, stretch=False)
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
+        self.setWindowTitle("Tesla Dashcam Reviewer")
+        #self.setAttribute(Qt.WA_OpaquePaintEvent)
 
     def resizeEvent(self, event):
-        size = self.size()
-        print(f'MainWindows size is now: width = {size.width()} height = {size.height()}')
+        self.setUpdatesEnabled(False)
+        height = self.height()
+        width = int(height * self.aspect_ratio)
+        self.resize(QSize(width, height))
         super().resizeEvent(event)
+        self.setUpdatesEnabled(True)
 
     def pause_others(self):
         sender = self.sender()
