@@ -1,0 +1,19 @@
+The below works.
+
+Mac Os: ** Using single file --onefile flag worked but the load time was greatly increased
+on my old mac intel. Maybe not an issue on newer macs? Will have to test on my kid's M1 Mac Mini.
+
+pyinstaller --noconfirm --add-data "/usr/local/Cellar/qt/6.7.3/share/qt/plugins/platforms:PySide6/Qt/plugins/platforms" --add-data "/usr/local/Cellar/qt/6.7.3/share/qt/plugins/multimedia:PySide6/Qt/plugins/multimedia" --windowed tesla_dashcam_viewer.py
+
+Or much slower loading single file distribution
+
+pyinstaller --noconfirm --onefile --add-data "/usr/local/Cellar/qt/6.7.3/share/qt/plugins/platforms:PySide6/Qt/plugins/platforms" --add-data "/usr/local/Cellar/qt/6.7.3/share/qt/plugins/multimedia:PySide6/Qt/plugins/multimedia" --windowed tesla_dashcam_viewer.py
+
+
+
+
+Windows: For some reason everything is detect automaticlly unlike my Intel Mac.
+pyinstaller --noconfirm --windowed tesla_dashcam_viewer.py
+
+OR for a single file, it seems to load quickly.
+pyinstaller --noconfirm --onefile --windowed tesla_dashcam_viewer.py
