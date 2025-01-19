@@ -2,13 +2,13 @@
 
 from PySide6.QtWidgets import QSlider, QStyleOptionSlider, QStyle
 from PySide6.QtCore import Qt, QRect, QSize
-from PySide6.QtGui import QPainter, QColor, QSurfaceFormat
+from PySide6.QtGui import QPainter, QColor, QSurfaceFormat, QBrush
 
 class TimelineSliderWidget(QSlider):
     def __init__(self, media_player_video_widget_dict, orientation=Qt.Horizontal, parent=None):
         super().__init__(orientation, parent=parent)
-        self._handle_size = 18 # Diameter of the slider's handle.
-        self._handle_rect = None
+        self._handle_size = 30 # Diameter of the slider's handle.
+        self._handle_rect = QRect()
         # Flag to see if timeline is being manually scrolled.
         self.is_dragging = False
         # Flag to track if an arrow key is pressed
@@ -18,22 +18,21 @@ class TimelineSliderWidget(QSlider):
         self.setup_ui()
         self.setup_connections()
 
-    def handle_hitbox_test(self, pos):
-        """Enlarge this slider's handle's hitbox since it can be hard to click
-        on as video is playing."""
-        if self._handle_rect:
-            hitbox = self._handle_rect.adjusted(-50, -50, 50, 50)
-            hitbox_contains_pos = hitbox.contains(pos)
-            print('hitbox selected.')
-            return hitbox_contains_pos
-        else:
-            return False
+    # def handle_hitbox_test(self, pos):
+    #     """Enlarge this slider's handle's hitbox since it can be hard to click
+    #     on as video is playing."""
+    #     if self._handle_rect:
+    #         hitbox = self._handle_rect.adjusted(-50, -50, 50, 50)
+    #         hitbox_contains_pos = hitbox.contains(pos)
+    #         print(f"Hitbox: {hitbox}, Pos: {pos}, Contains: {hitbox_contains_pos}")
+    #         return hitbox_contains_pos
+    #     else:
+    #         return False
+    #
+    # def mousePressEvent(self, event):
+    #     if self.handle_hitbox_test(event.pos()):
+    #         super().mousePressEvent(event)
 
-    def mousePressEvent(self, event):
-        if self.handle_hitbox_test(event.pos()):
-            super().mousePressEvent(event)
-        else:
-            event.ignore()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
@@ -76,9 +75,9 @@ class TimelineSliderWidget(QSlider):
         #self.timer.timeout.connect(self.update_video)
 
     def setup_ui(self):
-        format = QSurfaceFormat()
-        format.setRenderableType(QSurfaceFormat.OpenGL)
-        QSurfaceFormat.setDefaultFormat(format)
+        #format = QSurfaceFormat()
+        #format.setRenderableType(QSurfaceFormat.OpenGL)
+        #QSurfaceFormat.setDefaultFormat(format)
         self.setStyleSheet("QSlider::handle { background: transparent; }")
         #self.setFocusPolicy(Qt.StrongFocus)
         self.setRange(0, 1000)  # Set the range based on video duration later
@@ -160,7 +159,7 @@ class TimelineSliderWidget(QSlider):
 
     def sizeHint(self):
        """Override sizeHint to provide enough space for the circular handle."""
-       return QSize(super().sizeHint().width(), 20)  # Adjust height as needed
+       return QSize(super().sizeHint().width(), 30)  # Adjust height as needed
 
 
 
