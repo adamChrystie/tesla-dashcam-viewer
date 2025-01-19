@@ -1,5 +1,6 @@
 from PySide6.QtMultimedia import QMediaPlayer
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy
+from PySide6.QtWidgets import (
+    QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QLineEdit)
 from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
@@ -64,6 +65,13 @@ class VideoEventWidget(QWidget):
         self.like_clip_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.like_clip_button)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+
+        # Optional liked event parent folder name description.
+        liked_folder_name_label = QLabel("Event's Folder Tag")
+        self.liked_folder_name_widget = QLineEdit()
+        self.liked_folder_name_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        layout.addWidget(liked_folder_name_label)
+        layout.addWidget(self.liked_folder_name_widget)
         # Wrap up
         layout.addStretch()
         self.setLayout(layout)
@@ -136,6 +144,9 @@ class VideoEventWidget(QWidget):
         }
         QPushButton:hover {
             background-color: #005bb5;
+        }
+        QLineEdit { 
+            color: black;
         }
         """
         self.setStyleSheet(qml)

@@ -24,8 +24,6 @@ from ui.main_window_widgets import CommandButtonsRow
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-
         self.is_dragging = False
         screen = QScreen.availableGeometry(QApplication.primaryScreen())
         self.aspect_ratio = 1.63
@@ -116,9 +114,13 @@ class MainWindow(QMainWindow):
         dir_path = file_dialog.getExistingDirectory()
         if dir_path:
             for widget in video_widgets:
+                event_name = widget.event_name
+                if widget.liked_folder_name_widget.text() != "":
+                    event_tag = widget.liked_folder_name_widget.text().replace(' ','-')
+                    event_name = f'{event_name}_{event_tag}'
                 for src_fpath in widget.video_files:
                     f_name = os.path.basename(src_fpath)
-                    dst_dir_path = os.path.join(dir_path, widget.event_name)
+                    dst_dir_path = os.path.join(dir_path, event_name)
                     try:
                         if not os.path.exists(dst_dir_path):
                             os.makedirs(dst_dir_path)
@@ -171,10 +173,10 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    if platform.system() == "Darwin":
-        app.setStyle("macos")
-    else:
-        app.setStyle("Windows")
+    # if platform.system() == "Darwin":
+    #     app.setStyle("macos")
+    # else:
+    #     app.setStyle("Windows")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
