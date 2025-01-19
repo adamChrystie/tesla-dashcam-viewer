@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
             item = self.video_widget_layout.itemAt(i)
             widget = item.widget()
             if isinstance(widget, VideoEventWidget):
-                if widget != sender and widget.play_pause_button.text() == " Pause ":
+                if widget != sender and widget.play_pause_button.text() == "Pause":
                     widget.play_pause_button.click()  # Trigger a pause
                     break # We only can have one actively playing VideoEventWidget. Exiting the loop dramatically
                           # increases ui responsiveness. Verified via testing.

@@ -27,7 +27,6 @@ class CommandButtonsRow(QWidget):
         command_buttons_hlayout.addWidget(copy_liked_videos_button)
         command_buttons_hlayout.addStretch(stretch=400)
 
-
     def set_style(self):
         """Apply a stylesheet."""
         qml = """

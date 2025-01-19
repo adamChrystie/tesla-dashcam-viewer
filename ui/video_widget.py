@@ -50,22 +50,20 @@ class VideoEventWidget(QWidget):
         # Set up layout
         layout = QHBoxLayout()
         layout.setContentsMargins(1, 2, 1, 2)
-        #layout.setContentsMargins(0, 0, 0, 0)
         layout.addSpacing(0)
         # Label to display the video file name
         self.label = QLabel(self.event_name)
         self.label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.label)
         # Play/Pause button
-        self.play_pause_button = QPushButton(" Play ")
+        self.play_pause_button = QPushButton("Play")
         self.play_pause_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.play_pause_button)
         # Like/Heart Clip Button
-        self.like_clip_button = QPushButton(" \u2764 ")  # Unicode for a heart icon
+        self.like_clip_button = QPushButton("\u2764")  # Unicode for a heart icon
         self.like_clip_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         layout.addWidget(self.like_clip_button)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-
         # Optional liked event parent folder name description.
         liked_folder_name_label = QLabel("Event's Folder Tag")
         self.liked_folder_name_widget = QLineEdit()
@@ -75,7 +73,6 @@ class VideoEventWidget(QWidget):
         # Wrap up
         layout.addStretch()
         self.setLayout(layout)
-
 
     def setup_connections(self):
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
@@ -109,10 +106,10 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.pause()
             self._left_repeater_player.pause()
             self._right_repeater_player.pause()
-            self.play_pause_button.setText(" Play ")
+            self.play_pause_button.setText("Play")
         else:
             self.play_pressed.emit()
-            self.play_pause_button.setText(" Pause ")
+            self.play_pause_button.setText("Pause")
             self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
             self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
             self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))

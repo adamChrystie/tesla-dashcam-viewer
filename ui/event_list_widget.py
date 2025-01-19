@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QSizePolicy
 class ScrollableWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Create a vertical layout for the custom widget
         self.layout = QVBoxLayout(self)
@@ -38,14 +39,12 @@ class ScrollableWidget(QWidget):
         """Add a widget to the container layout."""
         self.container_layout.addWidget(widget)
         # Adjust the container's minimum width based on the added widget
-        #self._adjust_width(widget)
+        self._adjust_width(widget)
 
-    # def _adjust_width(self, widget):
-    #     """Adjust the container's width to fit the new widget."""
-    #     widget_width = widget.sizeHint().width()
-    #     current_width = self.container.minimumSizeHint().width()
-    #     new_width = max(current_width, widget_width)
-    #     #print(f'scroll list container minimum width:{new_width}')
-    #     # Update the container's minimum width
-    #     self.container.setMinimumWidth(new_width)
-    #     print('Done adjusting width of event list widget after adding video event widget.')
+    def _adjust_width(self, widget):
+        """Adjust the container's width to fit the new widget."""
+        widget_width = widget.sizeHint().width()
+        current_width = self.container.minimumSizeHint().width()
+        new_width = max(current_width, widget_width)
+        # Update the container's minimum width
+        self.setMinimumWidth(new_width)
