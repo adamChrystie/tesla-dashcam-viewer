@@ -1,6 +1,6 @@
 """A widget to scrub through the video timeline manually."""
 
-from PySide6.QtWidgets import QSlider
+from PySide6.QtWidgets import QSlider, QStyleOptionSlider, QStyle
 from PySide6.QtCore import Qt, QRect, QSize
 from PySide6.QtGui import QPainter, QColor, QSurfaceFormat
 
@@ -8,6 +8,7 @@ class TimelineSliderWidget(QSlider):
     def __init__(self, media_player_video_widget_dict, orientation=Qt.Horizontal, parent=None):
         super().__init__(orientation, parent=parent)
         self._handle_size = 18 # Diameter of the slider's handle.
+        self._handle_rect = None
         # Flag to see if timeline is being manually scrolled.
         self.is_dragging = False
         # Flag to track if an arrow key is pressed
@@ -16,6 +17,23 @@ class TimelineSliderWidget(QSlider):
         self.main_player = media_player_video_widget_dict['front']['media_player']
         self.setup_ui()
         self.setup_connections()
+
+    def handle_hitbox_test(self, pos):
+        """Enlarge this slider's handle's hitbox since it can be hard to click
+        on as video is playing."""
+        if self._handle_rect:
+            hitbox = self._handle_rect.adjusted(-50, -50, 50, 50)
+            hitbox_contains_pos = hitbox.contains(pos)
+            print('hitbox selected.')
+            return hitbox_contains_pos
+        else:
+            return False
+
+    def mousePressEvent(self, event):
+        if self.handle_hitbox_test(event.pos()):
+            super().mousePressEvent(event)
+        else:
+            event.ignore()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
@@ -120,22 +138,25 @@ class TimelineSliderWidget(QSlider):
         # Calculate the center position of the slider handle
         handle_pos_x = self.valueToPosition(self.value()) - self._handle_size // 2
         handle_pos_y = (self.height() - self._handle_size) // 2
-        handle_rect = QRect(handle_pos_x, handle_pos_y, self._handle_size, self._handle_size)
+        self._handle_rect = QRect(handle_pos_x, handle_pos_y, self._handle_size, self._handle_size)
 
         # Draw the handle as a circle
         painter.setBrush(QColor(71, 149, 179))  # Handle color
         painter.setPen(Qt.NoPen)  # Remove border
-        painter.drawEllipse(handle_rect)  # Draw the circle
+        painter.drawEllipse(self._handle_rect)  # Draw the circle
         painter.end()
 
     def valueToPosition(self, value):
         """Convert the slider value to the corresponding position."""
-        try:
-            position = int((value - self.minimum()) / (self.maximum() - self.minimum()) * (self.width() - 9))
-        except ZeroDivisionError as e:
-            position = value
-            print(f'timeline_slider.valueToPosition error handled:\n{e}')
-        return position
+        if value != 0:
+            try:
+                position = int((value - self.minimum()) / (self.maximum() - self.minimum()) * (self.width() - 9))
+            except ZeroDivisionError as e:
+                position = value
+                print(f'timeline_slider.valueToPosition error handled:\n{e}')
+            return position
+        else:
+            return value
 
     def sizeHint(self):
        """Override sizeHint to provide enough space for the circular handle."""
