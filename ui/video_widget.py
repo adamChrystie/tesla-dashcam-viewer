@@ -11,6 +11,7 @@ class VideoEventWidget(QWidget):
         super().__init__(parent=parent)
         self._is_playing = False
         self._event_name = event_name
+        self._liked_folder_name = None
         self._backup_player = media_video_players['back']['media_player']
         self._front_upper_player = media_video_players['front']['media_player']
         self._left_repeater_player = media_video_players['left_repeater']['media_player']
@@ -19,6 +20,12 @@ class VideoEventWidget(QWidget):
         self._is_liked = False
         self.setup_ui()
         self.setup_connections()
+
+    @property
+    def liked_folder_name(self):
+        """An optional name to use as the events parent folder when copying liked events.
+        This can help users find their liked events by a named folder."""
+        return self._liked_folder_name
 
     @property
     def is_liked(self):

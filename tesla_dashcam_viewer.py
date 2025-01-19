@@ -24,6 +24,8 @@ from ui.main_window_widgets import CommandButtonsRow
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+
         self.is_dragging = False
         screen = QScreen.availableGeometry(QApplication.primaryScreen())
         self.aspect_ratio = 1.63
@@ -169,6 +171,10 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    if platform.system() == "Darwin":
+        app.setStyle("macos")
+    else:
+        app.setStyle("Windows")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
