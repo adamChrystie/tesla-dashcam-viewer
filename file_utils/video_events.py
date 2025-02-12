@@ -25,7 +25,7 @@ class VideoEventData(object):
     def timestamp(self):
         return self._timestamp
 
-    def update_camera_files_dict(self, video_file_paths):
+    def update_camera_files_dict(self, video_file_paths: dict):
         """ Setup the dictionary mapping camera names to their video file paths."""
         for cam_name in TESLAS_CAMERA_NAMES:
             for video_fpath in video_file_paths:
@@ -41,7 +41,7 @@ def get_all_videos_in_dir(dir_path: Union[Path, str]) -> list:
         files.append(f)
     return files
 
-def group_videos_by_timestamp(fpath_list):
+def group_videos_by_timestamp(fpath_list: list):
     """
     Groups video files based on their starting timestamp in the filename.
 
@@ -73,10 +73,3 @@ def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]):
         event_data.update_camera_files_dict(video_file_paths)
         event_data_objs.append(event_data)
     return event_data_objs
-
-
-if __name__ == "__main__":
-    dir_path = Path('/Volumes/ThunderBay/fileServer/Media_Center_Videos/TeslaCam/TeslaCam_imported_2024-12-18/SavedClips/2023-12-21_09-28-25')
-    event_data_objs = make_event_data_objects_for_a_dir_path(dir_path)
-    for i in event_data_objs:
-        print(f'{i._timestamp}: {[(k, str(v)) for k, v in i._camera_files_dict.items()]}')

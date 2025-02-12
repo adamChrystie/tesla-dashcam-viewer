@@ -1,9 +1,9 @@
 """A widget to hold all the video event widgets."""
 
-from PySide6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QSizePolicy
+from PySide6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QSizePolicy, QLayoutItem
 
 class ScrollableWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget=None):
         super().__init__(parent=parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -29,19 +29,19 @@ class ScrollableWidget(QWidget):
         # Ensure the scroll area expands in both directions
         self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-    def count(self):
+    def count(self) -> int:
         return self.container_layout.count()
 
-    def itemAt(self, value):
+    def itemAt(self, value: int) -> QLayoutItem:
         return self.container_layout.itemAt(value)
 
-    def add_widget(self, widget):
+    def add_widget(self, widget: QWidget) -> None:
         """Add a widget to the container layout."""
         self.container_layout.addWidget(widget)
         # Adjust the container's minimum width based on the added widget
         self._adjust_width(widget)
 
-    def _adjust_width(self, widget):
+    def _adjust_width(self, widget: QWidget) -> None:
         """Adjust the container's width to fit the new widget."""
         widget_width = widget.sizeHint().width()
         current_width = self.container.minimumSizeHint().width()
