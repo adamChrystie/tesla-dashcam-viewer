@@ -1,11 +1,11 @@
 """A window which can be displayed and closes automatically after X number of seconds"""
-
+from typing import Union
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 from PySide6.QtCore import QTimer, Qt
 
 class InfoPopup(QWidget):
-    def __init__(self, title="Information", message="This popup will close after 10 seconds.",
-                 timeout_seconds=None, parent=None):
+    def __init__(self, title: str="Information", message: str="This popup will close after 10 seconds.",
+                 timeout_seconds: Union[int, None]=None, parent: QWidget=None):
         super().__init__(parent=parent)
         # Make the window modal
         self.setWindowModality(Qt.ApplicationModal)

@@ -1,7 +1,8 @@
 import os
-import platform
 import sys
 import shutil
+from typing import List
+
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
@@ -9,7 +10,7 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,QMainWindow,
     QFileDialog, QSizePolicy)
 
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtGui import QScreen
@@ -75,7 +76,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Tesla Dashcam Reviewer")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QEvent) -> None:
         self.setUpdatesEnabled(False)
         height = self.height()
         width = int(height * self.aspect_ratio)
@@ -83,7 +84,7 @@ class MainWindow(QMainWindow):
         super().resizeEvent(event)
         self.setUpdatesEnabled(True)
 
-    def pause_others(self):
+    def pause_others(self) -> None:
         sender = self.sender()
         for i in range(self.video_widget_layout.count()):
             item = self.video_widget_layout.itemAt(i)
@@ -94,12 +95,12 @@ class MainWindow(QMainWindow):
                     break # We only can have one actively playing VideoEventWidget. Exiting the loop dramatically
                           # increases ui responsiveness. Verified via testing.
 
-    def pause_all_media_players(self):
+    def pause_all_media_players(self) -> None:
         """Pause all the media players."""
         for widgets_dict in self.media_player_video_widget_dict.values():
             widgets_dict['media_player'].pause()
 
-    def copy_liked_videos(self):
+    def copy_liked_videos(self) -> None:
         """Copy the liked videos to a specified directory."""
         self.pause_all_media_players()
         info_messages = []
@@ -142,18 +143,18 @@ class MainWindow(QMainWindow):
             info_popup = InfoPopup(message='Done copying files.', parent=self)
         info_popup.show()
 
-    def update_slider_range(self, duration):
+    def update_slider_range(self, duration: int) -> None:
         """Update the slider range when video duration changes."""
         self.slider.setRange(0, duration)
 
-    def update_slider(self, position):
+    def update_slider(self, position: int) -> None:
         """Update slider to match current video playback position."""
         duration = self._main_player.duration()
         if duration:
             slider_position = position
             self.slider.setValue(slider_position)
 
-    def add_video(self):
+    def add_video(self) -> None:
         self.pause_all_media_players()
         file_dialog = QFileDialog(self)
         dir_path = file_dialog.getExistingDirectory()
@@ -166,7 +167,7 @@ class MainWindow(QMainWindow):
                 event_name = event_data.timestamp
                 self.add_video_clip_widget(event_name, vide_files)
 
-    def add_video_clip_widget(self, event_name, video_files):
+    def add_video_clip_widget(self, event_name: str, video_files: List[str]) -> None:
         video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
         video_clip_widget.play_pressed.connect(self.pause_others)
         self.video_widget_layout.add_widget(video_clip_widget)
