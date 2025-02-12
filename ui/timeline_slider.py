@@ -1,11 +1,13 @@
 """A widget to scrub through the video timeline manually."""
-
-from PySide6.QtWidgets import QSlider
+from typing import Union
+from PySide6.QtWidgets import QSlider, QWidget
 from PySide6.QtCore import Qt, QRect, QSize
-from PySide6.QtGui import QPainter, QColor, QSurfaceFormat
+from PySide6.QtGui import QPainter, QColor, QSurfaceFormat, QPaintEvent
 
 class TimelineSliderWidget(QSlider):
-    def __init__(self, media_player_video_widget_dict, orientation=Qt.Horizontal, parent=None):
+    def __init__(self, media_player_video_widget_dict: dict,
+                 orientation: Qt.Orientation=Qt.Orientation.Horizontal,
+                 parent: Union[QWidget, None]=None):
         super().__init__(orientation, parent=parent)
         self._handle_size = 30 # Diameter of the slider's handle.
         # Flag to see if timeline is being manually scrolled.
@@ -65,7 +67,7 @@ class TimelineSliderWidget(QSlider):
     #     self.on_slider_value_changed(new_value)
 
 
-    def setup_connections(self):
+    def setup_connections(self) -> None:
         """Setup the widget's connections."""
         self.sliderMoved.connect(self.on_slider_moved)
         self.sliderPressed.connect(self.on_slider_pressed)
@@ -73,20 +75,20 @@ class TimelineSliderWidget(QSlider):
         #self.valueChanged.connect(self.on_slider_value_changed)
 
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         format = QSurfaceFormat()
         format.setRenderableType(QSurfaceFormat.OpenGL)
         QSurfaceFormat.setDefaultFormat(format)
         self.setStyleSheet("QSlider::handle { background: transparent; }")
         self.setRange(0, 1000)  # Set the range based on video duration later
 
-    def on_slider_pressed(self):
+    def on_slider_pressed(self) -> None:
         self.is_dragging = True
         for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
             media_player = self.media_player_video_widget_dict[camera_name]['media_player']
             media_player.pause()
 
-    def on_slider_released(self):
+    def on_slider_released(self) -> None:
         self.is_dragging = False
         duration = self.main_player.duration()  # Total video duration in milliseconds
         if duration:
@@ -97,7 +99,7 @@ class TimelineSliderWidget(QSlider):
                 media_player.setPosition(new_position)  # Seek to new position
                 media_player.play()
 
-    def on_slider_moved(self, position):
+    def on_slider_moved(self, position: int) -> None:
         """Seek video when slider is moved."""
         duration = self.main_player.duration()  # Get total video duration in milliseconds
         if duration:
@@ -106,7 +108,7 @@ class TimelineSliderWidget(QSlider):
                 media_player = self.media_player_video_widget_dict[camera_name]['media_player']
                 media_player.setPosition(new_position)  # Seek to new position
 
-    def on_slider_value_changed(self, value):
+    def on_slider_value_changed(self, value: int) -> None:
         if self.is_dragging:
             pass
         elif self.arrow_key_pressed:
@@ -117,7 +119,7 @@ class TimelineSliderWidget(QSlider):
     # def update_video(self):
     #     pass
 
-    def paintEvent(self, event):
+    def paintEvent(self, event: QPaintEvent) -> None:
         super().paintEvent(event)
         painter = QPainter(self)
         # Calculate the center position of the slider handle
@@ -131,7 +133,7 @@ class TimelineSliderWidget(QSlider):
         painter.drawEllipse(self._handle_rect)  # Draw the circle
         painter.end()
 
-    def valueToPosition(self, value):
+    def valueToPosition(self, value:int) -> int:
         """Convert the slider value to the corresponding position."""
         if value != 0:
             try:
@@ -142,7 +144,7 @@ class TimelineSliderWidget(QSlider):
         else:
             return value
 
-    def sizeHint(self):
+    def sizeHint(self) -> QSize:
        """Override sizeHint to provide enough space for the circular handle."""
        return QSize(super().sizeHint().width(), self._handle_size)  # Adjust height as needed
 
