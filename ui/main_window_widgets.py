@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QSizePolicy
 from PySide6.QtCore import Qt
 
 class CommandButtonsRow(QWidget):
-    def __init__(self, add_video: QPushButton, copy_liked_videos: QPushButton, parent: QWidget=None):
+    def __init__(self, add_video, copy_liked_videos, parent=None):
         super().__init__(parent=parent)
         self._copy_liked_videos = copy_liked_videos
         self._add_video = add_video
