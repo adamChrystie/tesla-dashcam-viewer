@@ -2,7 +2,7 @@
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 from constants import TESLAS_CAMERA_NAMES
 
 
@@ -18,21 +18,21 @@ class VideoEventData(object):
         self._camera_files_dict = defaultdict(Path)
 
     @property
-    def camera_files_dict(self):
+    def camera_files_dict(self) -> dict:
         return self._camera_files_dict
 
     @property
-    def timestamp(self):
+    def timestamp(self) -> str:
         return self._timestamp
 
-    def update_camera_files_dict(self, video_file_paths: dict):
+    def update_camera_files_dict(self, video_file_paths: dict) -> None:
         """ Setup the dictionary mapping camera names to their video file paths."""
         for cam_name in TESLAS_CAMERA_NAMES:
             for video_fpath in video_file_paths:
                 if cam_name in video_fpath.name:
                     self._camera_files_dict[cam_name] = video_fpath
 
-def get_all_videos_in_dir(dir_path: Union[Path, str]) -> list:
+def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[str]:
     """Given a directory return all the mp4 files in the dir as a list."""
     if isinstance(dir_path, str):
         dir_path = Path(dir_path)
@@ -41,7 +41,7 @@ def get_all_videos_in_dir(dir_path: Union[Path, str]) -> list:
         files.append(f)
     return files
 
-def group_videos_by_timestamp(fpath_list: list):
+def group_videos_by_timestamp(fpath_list: list) -> dict:
     """
     Groups video files based on their starting timestamp in the filename.
 
@@ -62,7 +62,7 @@ def group_videos_by_timestamp(fpath_list: list):
             grouped_files[timestamp].append(f_path)
     return dict(grouped_files)
 
-def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]):
+def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]) -> List[VideoEventData]:
     """ Given a directory, make a list of event data objects for each timestamp event."""
     video_files = get_all_videos_in_dir(dir_path)
     grouped_videos = group_videos_by_timestamp(video_files)

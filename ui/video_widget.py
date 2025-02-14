@@ -1,3 +1,4 @@
+from typing import List
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QLineEdit)
@@ -8,7 +9,7 @@ class VideoEventWidget(QWidget):
 
     play_pressed = Signal()
 
-    def __init__(self, event_name: str, media_video_players: dict, video_files: list, parent=None):
+    def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], parent: QWidget=None):
         super().__init__(parent=parent)
         self._is_playing = False
         self._event_name = event_name
@@ -23,26 +24,26 @@ class VideoEventWidget(QWidget):
         self.setup_connections()
 
     @property
-    def liked_folder_name(self):
+    def liked_folder_name(self) -> str:
         """An optional name to use as the events parent folder when copying liked events.
         This can help users find their liked events by a named folder."""
         return self._liked_folder_name
 
     @property
-    def is_liked(self):
+    def is_liked(self) -> bool:
         return self._is_liked
 
     @property
-    def video_files(self):
+    def video_files(self) -> List[str]:
         return self._video_files
     @video_files.setter
-    def video_files(self, value):
-        self._video_files = value
+    def video_files(self, value: List[str]):
+        self._video_files = list(value)
     @property
-    def event_name(self):
+    def event_name(self) -> str:
         return self._event_name
     @event_name.setter
-    def event_name(self, value):
+    def event_name(self, value: str):
         self._event_name = value
 
     def setup_ui(self):
@@ -74,17 +75,17 @@ class VideoEventWidget(QWidget):
         layout.addStretch()
         self.setLayout(layout)
 
-    def setup_connections(self):
+    def setup_connections(self) -> None:
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         self.like_clip_button.clicked.connect(self.toggle_is_liked)
         self._front_upper_player.mediaStatusChanged.connect(self.handle_media_status_change)
 
-    def handle_media_status_change(self, status):
+    def handle_media_status_change(self, status: QMediaPlayer.MediaStatus) -> None:
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
             if self._is_playing:
                 self.toggle_play_pause()
 
-    def toggle_is_liked(self):
+    def toggle_is_liked(self) -> None:
         """Handle the heart button being pressed."""
         self._is_liked = not self._is_liked
         if self._is_liked:
@@ -92,7 +93,7 @@ class VideoEventWidget(QWidget):
         else:
             self.like_clip_button.setStyleSheet("color: white;")
 
-    def toggle_play_pause(self):
+    def toggle_play_pause(self) -> None:
         """
         self._backup_player = media_video_players['back']
         self._front_upper_player = media_video_players['front']
@@ -120,7 +121,7 @@ class VideoEventWidget(QWidget):
             self._right_repeater_player.play()
         self._is_playing = not self._is_playing
 
-    def set_style(self):
+    def set_style(self) -> None:
         """Apply a stylesheet."""
         qml = """
         QWidget {
