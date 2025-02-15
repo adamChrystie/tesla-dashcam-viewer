@@ -19,21 +19,41 @@ class VideoEventData(object):
 
     @property
     def camera_files_dict(self) -> dict:
+        """
+        Get the dictionary mapping camera names to their video file paths.
+        Returns:
+            dict: A dictionary mapping camera names to their video file paths.
+        """
         return self._camera_files_dict
 
     @property
     def timestamp(self) -> str:
+        """
+        Get the timestamp of the video event.
+        Returns:
+            str: The timestamp of the video event.
+        """
         return self._timestamp
 
     def update_camera_files_dict(self, video_file_paths: dict) -> None:
-        """ Setup the dictionary mapping camera names to their video file paths."""
+        """
+        Set up mapping camera names to their video file paths.
+        Args:
+            video_file_paths (dict): A dictionary mapping camera names to their video file paths.
+        """
         for cam_name in TESLAS_CAMERA_NAMES:
             for video_fpath in video_file_paths:
                 if cam_name in video_fpath.name:
                     self._camera_files_dict[cam_name] = video_fpath
 
 def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[str]:
-    """Given a directory return all the mp4 files in the dir as a list."""
+    """
+    Given a directory return all the mp4 files in the directory & subdirectories.
+    Args:
+        dir_path (Path|str): A parent directory path to start searching from.
+    Returns:
+        list of str: A list of file paths.
+    """
     if isinstance(dir_path, str):
         dir_path = Path(dir_path)
     files = []
@@ -41,13 +61,11 @@ def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[str]:
         files.append(f)
     return files
 
-def group_videos_by_timestamp(fpath_list: list) -> dict:
+def group_videos_by_timestamp(fpath_list: List[str]) -> dict:
     """
     Groups video files based on their starting timestamp in the filename.
-
     Args:
         file_list (list of str): List of video file names.
-
     Returns:
         dict: A dictionary where the keys are timestamps and values are lists of files.
     """
@@ -63,7 +81,15 @@ def group_videos_by_timestamp(fpath_list: list) -> dict:
     return dict(grouped_files)
 
 def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]) -> List[VideoEventData]:
-    """ Given a directory, make a list of event data objects for each timestamp event."""
+    """
+    Given a directory, make a list of event data objects for each timestamp event. Subdirectories
+    are also searched for events.
+    Args:
+        dir_path (Path|str): A parent directory path to start searching from.
+    Returns:
+        list of VideoEventData: A list of VideoEventData objects.
+    """
+
     video_files = get_all_videos_in_dir(dir_path)
     grouped_videos = group_videos_by_timestamp(video_files)
     event_data_objs = []
