@@ -77,6 +77,10 @@ class MainWindow(QMainWindow):
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
 
     def resizeEvent(self, event: QEvent) -> None:
+        """Resize the window.
+        Args:
+            event (QEvent): The resize event.
+        """
         self.setUpdatesEnabled(False)
         height = self.height()
         width = int(height * self.aspect_ratio)
@@ -85,6 +89,7 @@ class MainWindow(QMainWindow):
         self.setUpdatesEnabled(True)
 
     def pause_others(self) -> None:
+        """Pause all other media players except the one that triggered the signal."""
         sender = self.sender()
         for i in range(self.video_widget_layout.count()):
             item = self.video_widget_layout.itemAt(i)
@@ -144,11 +149,17 @@ class MainWindow(QMainWindow):
         info_popup.show()
 
     def update_slider_range(self, duration: int) -> None:
-        """Update the slider range when video duration changes."""
+        """Update the slider range when video duration changes.
+        Args:
+            duration (int): The duration of the video.
+        """
         self.slider.setRange(0, duration)
 
     def update_slider(self, position: int) -> None:
-        """Update slider to match current video playback position."""
+        """Update slider to match current video playback position.
+        Args:
+            position (int): The current position of the video.
+        """
         duration = self._main_player.duration()
         if duration:
             slider_position = position
@@ -168,6 +179,11 @@ class MainWindow(QMainWindow):
                 self.add_video_clip_widget(event_name, vide_files)
 
     def add_video_clip_widget(self, event_name: str, video_files: List[str]) -> None:
+        """Add a video clip widget to the layout.
+        Args:
+            event_name (str): The name of the event.
+            video_files (List[str]): A list of video files to play.
+        """
         video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
         video_clip_widget.play_pressed.connect(self.pause_others)
         self.video_widget_layout.add_widget(video_clip_widget)

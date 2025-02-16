@@ -9,7 +9,7 @@ class CommandButtonsRow(QWidget):
         self._add_video = add_video
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Setup the widget's ui."""
         self.set_style()
         command_buttons_hlayout = QHBoxLayout()
@@ -27,7 +27,7 @@ class CommandButtonsRow(QWidget):
         command_buttons_hlayout.addWidget(copy_liked_videos_button)
         command_buttons_hlayout.addStretch(stretch=400)
 
-    def set_style(self):
+    def set_style(self) -> None:
         """Apply a stylesheet."""
         qml = """
         QWidget {
