@@ -7,7 +7,6 @@ from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
     play_pressed = Signal()
-    seek_pressed = Signal(int)
     def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], parent: QWidget=None):
         """A single multi view video event to represent a specific time.
         Args:
