@@ -7,6 +7,7 @@ from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
     play_pressed = Signal()
+    last_played_instance = None
     def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], parent: QWidget=None):
         """A single multi view video event to represent a specific time.
         Args:
@@ -132,15 +133,16 @@ class VideoEventWidget(QWidget):
         else:
             self.like_clip_button.setStyleSheet("color: white;")
 
+    def set_media_player_sources(self) -> None:
+        """Set the media player source file paths."""
+        self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
+        self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
+        self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
+        self._right_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[3]))
+
+
     def toggle_play_pause(self) -> None:
-        """
-        self._backup_player = media_video_players['back']
-        self._front_upper_player = media_video_players['front']
-        self._left_repeater_player = media_video_players['left']
-        self._right_repeater_player = media_video_players['right']
-        :param self:
-        :return:
-        """
+        """Handle the user clicking the play / pause button."""
         if self._is_playing:
             self._backup_player.pause()
             self._front_upper_player.pause()
@@ -151,10 +153,11 @@ class VideoEventWidget(QWidget):
         else:
             self.play_pressed.emit()
             self.play_pause_button.setText("Pause")
-            self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
-            self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
-            self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
-            self._right_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[3]))
+            # Only set media player sources again if the user changes to a new event.
+            # Perhaps R&D if it makes sense to make 4 media players for each event rather
+            # than reusing just 4 media players.
+            if self.last_played_instance != id(self):
+                self.set_media_player_sources()
             self._backup_player.setPosition(self._current_playback_position)
             self._front_upper_player.setPosition(self._current_playback_position)
             self._left_repeater_player.setPosition(self._current_playback_position)
@@ -164,6 +167,8 @@ class VideoEventWidget(QWidget):
             self._left_repeater_player.play()
             self._right_repeater_player.play()
         self._is_playing = not self._is_playing
+        if self._is_playing:
+            self.last_played_instance = id(self)
 
     def set_style(self) -> None:
         """Apply a stylesheet."""
