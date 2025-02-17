@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QLineEdit)
 from PySide6.QtCore import QUrl, Signal
 
+
 class VideoEventWidget(QWidget):
     play_pressed = Signal()
     def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], parent: QWidget=None):
@@ -24,6 +25,7 @@ class VideoEventWidget(QWidget):
         self._right_repeater_player = media_video_players['right_repeater']['media_player']
         self._video_files = video_files
         self._is_liked = False
+        self._current_playback_position = 0
         self.setup_ui()
         self.setup_connections()
 
@@ -144,6 +146,7 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.pause()
             self._left_repeater_player.pause()
             self._right_repeater_player.pause()
+            self._current_playback_position = self._front_upper_player.position()
             self.play_pause_button.setText("Play")
         else:
             self.play_pressed.emit()
@@ -152,6 +155,10 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
             self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
             self._right_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[3]))
+            self._backup_player.setPosition(self._current_playback_position)
+            self._front_upper_player.setPosition(self._current_playback_position)
+            self._left_repeater_player.setPosition(self._current_playback_position)
+            self._right_repeater_player.setPosition(self._current_playback_position)
             self._backup_player.play()
             self._front_upper_player.play()
             self._left_repeater_player.play()
