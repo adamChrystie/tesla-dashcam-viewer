@@ -1,14 +1,20 @@
+from typing import List
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QLineEdit)
 from PySide6.QtCore import QUrl, Signal
 
+
 class VideoEventWidget(QWidget):
-    """A single multi view video event to represent a specific time."""
-
     play_pressed = Signal()
-
-    def __init__(self, event_name: str, media_video_players: dict, video_files: list, parent=None):
+    def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], parent: QWidget=None):
+        """A single multi view video event to represent a specific time.
+        Args:
+            event_name (str): The name of the event.
+            media_video_players (dict): A dictionary containing the media players for the event.
+            video_files (List[str]): A list of video files to play.
+            parent (QWidget, optional): The parent widget. Defaults to None.
+        """
         super().__init__(parent=parent)
         self._is_playing = False
         self._event_name = event_name
@@ -19,33 +25,62 @@ class VideoEventWidget(QWidget):
         self._right_repeater_player = media_video_players['right_repeater']['media_player']
         self._video_files = video_files
         self._is_liked = False
+        self._current_playback_position = 0
         self.setup_ui()
         self.setup_connections()
 
     @property
-    def liked_folder_name(self):
+    def liked_folder_name(self) -> str:
         """An optional name to use as the events parent folder when copying liked events.
-        This can help users find their liked events by a named folder."""
+        This can help users find their liked events by a named folder.
+        Returns:
+            str: The name of the folder.
+        """
         return self._liked_folder_name
 
     @property
-    def is_liked(self):
+    def is_liked(self) -> bool:
+        """Whether the event is liked.
+            Returns:
+                bool: True if the event is liked, False otherwise.
+        """
         return self._is_liked
 
     @property
-    def video_files(self):
+    def video_files(self) -> List[str]:
+        """The video files associated with the event.
+        Returns:
+            List[str]: The video files associated with the event.
+        """
         return self._video_files
+
     @video_files.setter
-    def video_files(self, value):
-        self._video_files = value
+    def video_files(self, value: List[str]):
+        """Set the video files associated with the event.
+        Args:
+            value (List[str]): The video files associated with the event.
+        """
+        self._video_files = list(value)
+
     @property
-    def event_name(self):
+    def event_name(self) -> str:
+        """The name of the event.
+        Returns:
+            str: The name of the event.
+        """
         return self._event_name
+
     @event_name.setter
-    def event_name(self, value):
+    def event_name(self, value: str):
+        """Set the name of the event.
+        Args:
+            value (str): The name of the event.
+        """
         self._event_name = value
 
     def setup_ui(self):
+        """Setup the widget's UI."""
+        # Set up style
         self.set_style()
         # Set up layout
         layout = QHBoxLayout()
@@ -74,17 +109,22 @@ class VideoEventWidget(QWidget):
         layout.addStretch()
         self.setLayout(layout)
 
-    def setup_connections(self):
+    def setup_connections(self) -> None:
+        """Setup the widget's connections."""
         self.play_pause_button.clicked.connect(self.toggle_play_pause)
         self.like_clip_button.clicked.connect(self.toggle_is_liked)
         self._front_upper_player.mediaStatusChanged.connect(self.handle_media_status_change)
 
-    def handle_media_status_change(self, status):
+    def handle_media_status_change(self, status: QMediaPlayer.MediaStatus) -> None:
+        """Handle the media status changing.
+        Args:
+            status (QMediaPlayer.MediaStatus): The new media status.
+        """
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
             if self._is_playing:
                 self.toggle_play_pause()
 
-    def toggle_is_liked(self):
+    def toggle_is_liked(self) -> None:
         """Handle the heart button being pressed."""
         self._is_liked = not self._is_liked
         if self._is_liked:
@@ -92,7 +132,7 @@ class VideoEventWidget(QWidget):
         else:
             self.like_clip_button.setStyleSheet("color: white;")
 
-    def toggle_play_pause(self):
+    def toggle_play_pause(self) -> None:
         """
         self._backup_player = media_video_players['back']
         self._front_upper_player = media_video_players['front']
@@ -106,6 +146,7 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.pause()
             self._left_repeater_player.pause()
             self._right_repeater_player.pause()
+            self._current_playback_position = self._front_upper_player.position()
             self.play_pause_button.setText("Play")
         else:
             self.play_pressed.emit()
@@ -114,13 +155,17 @@ class VideoEventWidget(QWidget):
             self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
             self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
             self._right_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[3]))
+            self._backup_player.setPosition(self._current_playback_position)
+            self._front_upper_player.setPosition(self._current_playback_position)
+            self._left_repeater_player.setPosition(self._current_playback_position)
+            self._right_repeater_player.setPosition(self._current_playback_position)
             self._backup_player.play()
             self._front_upper_player.play()
             self._left_repeater_player.play()
             self._right_repeater_player.play()
         self._is_playing = not self._is_playing
 
-    def set_style(self):
+    def set_style(self) -> None:
         """Apply a stylesheet."""
         qml = """
         QWidget {

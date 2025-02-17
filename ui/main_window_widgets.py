@@ -3,13 +3,13 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QSizePolicy
 from PySide6.QtCore import Qt
 
 class CommandButtonsRow(QWidget):
-    def __init__(self, add_video, copy_liked_videos, parent=None):
+    def __init__(self, add_video: QPushButton, copy_liked_videos: QPushButton, parent: QWidget=None):
         super().__init__(parent=parent)
         self._copy_liked_videos = copy_liked_videos
         self._add_video = add_video
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Setup the widget's ui."""
         self.set_style()
         command_buttons_hlayout = QHBoxLayout()
@@ -27,7 +27,7 @@ class CommandButtonsRow(QWidget):
         command_buttons_hlayout.addWidget(copy_liked_videos_button)
         command_buttons_hlayout.addStretch(stretch=400)
 
-    def set_style(self):
+    def set_style(self) -> None:
         """Apply a stylesheet."""
         qml = """
         QWidget {
