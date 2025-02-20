@@ -3,6 +3,7 @@ import sys
 import shutil
 from typing import List
 
+import constants
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
@@ -73,7 +74,7 @@ class MainWindow(QMainWindow):
         main_vlayout.addWidget(self.slider, stretch=False)
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
-        self.setWindowTitle("Tesla Dashcam Reviewer")
+        self.setWindowTitle(f"Tesla Dashcam Reviewer {constants.APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
 
     def resizeEvent(self, event: QEvent) -> None:
