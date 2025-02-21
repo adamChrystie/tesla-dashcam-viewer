@@ -4,6 +4,7 @@ import shutil
 from typing import List
 
 import constants
+import file_utils.updates
 from constants import TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
@@ -76,6 +77,18 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
         self.setWindowTitle(f"Tesla Dashcam Reviewer {constants.APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.check_for_updates()
+
+    def check_for_updates(self):
+        """Check for updates once per day and display a message if there is one."""
+        update_available = file_utils.updates.check_for_new_version()
+        if update_available:
+            popup = InfoPopup(
+                title='Update Available',
+                message=f"A newer version {update_available} is available. You are currently " \
+                    f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
+                parent=self)
+            popup.show()
 
     def resizeEvent(self, event: QEvent) -> None:
         """Resize the window.
