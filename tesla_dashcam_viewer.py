@@ -3,9 +3,11 @@ import sys
 import shutil
 from typing import List
 
-import constants
 import file_utils.updates
-from constants import TESLAS_CAMERA_NAMES
+from constants import (
+    APP_VERSION,
+    TESLAS_CAMERA_NAMES,
+    SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE)
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
 from PySide6.QtWidgets import (
@@ -24,14 +26,14 @@ from ui.event_list_widget import ScrollableWidget
 from ui.video_screens import QVideoScreenGrid
 from ui.main_window_widgets import CommandButtonsRow
 
-from file_utils.settings import SettingsFile
-from file_utils.updates import check_for_new_version
+from file_utils.settings import AppSettings
+from file_utils.updates import should_check_for_update
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         # Get App Settings
-        self._settings = SettingsFile()
+        self._settings = AppSettings()
         self.is_dragging = False
         screen = QScreen.availableGeometry(QApplication.primaryScreen())
         self.aspect_ratio = 1.63
@@ -80,21 +82,25 @@ class MainWindow(QMainWindow):
         main_vlayout.addWidget(self.slider, stretch=False)
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
-        self.setWindowTitle(f"Tesla Dashcam Reviewer {constants.APP_VERSION}")
+        self.setWindowTitle(f"Tesla Dashcam Reviewer {APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
-        if file_utils.updates.should_check_for_update(self._settings):
+        if should_check_for_update(self._settings):
+            print('INFO: LOOKING FOR NEWER VERSIONS.')
             update_available = file_utils.updates.check_for_new_version()
             if update_available:
                 popup = InfoPopup(
                     title='Update Available',
                     message=f"A newer version {update_available} is available. You are currently " \
-                            f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
+                            f"running {APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
                     parent=self)
                 popup.show()
 
     def closeEvent(self, event):
         """Handle cleanup when the window is closed."""
-        self._settings.write_settings_file()
+        # Supposedly the below is not needed since QSettings objects handle writing changed
+        # settings to disk periodically and when the object is destroyed.
+        #self._settings.sync()
+        pass
 
     def resizeEvent(self, event: QEvent) -> None:
         """Resize the window.
