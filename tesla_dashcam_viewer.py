@@ -10,7 +10,7 @@ from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
 from PySide6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,QMainWindow,
-    QFileDialog, QSizePolicy)
+    QFileDialog, QSizePolicy, QMessageBox)
 
 from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -24,9 +24,14 @@ from ui.event_list_widget import ScrollableWidget
 from ui.video_screens import QVideoScreenGrid
 from ui.main_window_widgets import CommandButtonsRow
 
+from file_utils.settings import SettingsFile
+from file_utils.updates import check_for_new_version
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        # Get App Settings
+        self._settings = SettingsFile()
         self.is_dragging = False
         screen = QScreen.availableGeometry(QApplication.primaryScreen())
         self.aspect_ratio = 1.63
@@ -77,42 +82,19 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
         self.setWindowTitle(f"Tesla Dashcam Reviewer {constants.APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
-        self.check_for_updates()
-
-    def check_for_updates(self):
-        import datetime
-        """Check for updates once per day and display a message if there is one."""
-        update_available = False
-        current_datatime = datetime.datetime.now().isoformat()
-        data_dict = {'last_update_check': current_datatime}
-        last_updated_jason_fpath = file_utils.updates.get_update_check_path()
-        if os.path.exists(last_updated_jason_fpath):
-            # read it and see if it has been 24 hours
-            pass
-        else:
-            file_utils.updates.write_json_file(last_updated_jason_fpath, data_dict)
-
-
-        update_available = file_utils.updates.check_for_new_version()
-        if update_available:
-            popup = InfoPopup(
-                title='Update Available',
-                message=f"A newer version {update_available} is available. You are currently " \
-                        f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
-                parent=self)
-            popup.show()
+        if file_utils.updates.should_check_for_update(self._settings):
             update_available = file_utils.updates.check_for_new_version()
-        else:
+            if update_available:
+                popup = InfoPopup(
+                    title='Update Available',
+                    message=f"A newer version {update_available} is available. You are currently " \
+                            f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
+                    parent=self)
+                popup.show()
 
-
-            update_available = file_utils.updates.check_for_new_version()
-        if update_available:
-            popup = InfoPopup(
-                title='Update Available',
-                message=f"A newer version {update_available} is available. You are currently " \
-                    f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
-                parent=self)
-            popup.show()
+    def closeEvent(self, event):
+        """Handle cleanup when the window is closed."""
+        self._settings.write_settings_file()
 
     def resizeEvent(self, event: QEvent) -> None:
         """Resize the window.
