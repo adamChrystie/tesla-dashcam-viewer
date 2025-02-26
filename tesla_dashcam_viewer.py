@@ -82,27 +82,15 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
         self.setWindowTitle(f"Tesla Dashcam Reviewer {constants.APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
-        check_for_new_version()
-        update_available = file_utils.updates.check_for_new_version()
-        if update_available:
-            popup = InfoPopup(
-                title='Update Available',
-                message=f"A newer version {update_available} is available. You are currently " \
-                        f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
-                parent=self)
-            popup.show()
+        if file_utils.updates.should_check_for_update(self._settings):
             update_available = file_utils.updates.check_for_new_version()
-        else:
-
-
-            update_available = file_utils.updates.check_for_new_version()
-        if update_available:
-            popup = InfoPopup(
-                title='Update Available',
-                message=f"A newer version {update_available} is available. You are currently " \
-                    f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
-                parent=self)
-            popup.show()
+            if update_available:
+                popup = InfoPopup(
+                    title='Update Available',
+                    message=f"A newer version {update_available} is available. You are currently " \
+                            f"running {constants.APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
+                    parent=self)
+                popup.show()
 
     def closeEvent(self, event):
         """Handle cleanup when the window is closed."""

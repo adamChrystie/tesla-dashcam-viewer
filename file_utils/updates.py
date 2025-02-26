@@ -5,34 +5,23 @@ import json
 import platform
 from typing import Union
 import requests
+
+import file_utils.settings
 from constants import APP_VERSION, API_URL
 
 
-def is_time_to_check(self, last_time_checked: datetime.datetime) -> bool:
-    """Check for updates once per day and display a message if there is one."""
-    check_for_update = False
-    current_datatime = datetime.datetime.now().isoformat()
-
-    return check_for_update
-
-def get_last_time_checked(last_check_fpath: Union[str, Path]) -> Union[str, Path, None]:
-    """Get the last time the app checked to see if there was a new version available."""
-
-    last_updated_jason_fpath = file_utils.updates.get_app_settings_file_path()
-    if os.path.exists(last_updated_jason_fpath):
-        # read it and see if it has been 24 hours
-        pass
-    else:
-        file_utils.updates.write_json_file(last_updated_jason_fpath, data_dict)
-
-def should_check_for_update(last_check_timestamp):
-    # Convert the stored timestamp to a datetime object
-    last_check_time = datetime.datetime.fromtimestamp(last_check_timestamp)
+def should_check_for_update(settings: file_utils.settings.SettingsFile):
+    """Is it time to check for available updates? App checks after 24
+    hours."""
+    last_time_checked = settings._data['last_update_check']
+    # Convert the stored timestamp str to a datetime object
+    date_format = "%Y-%m-%dT%H:%M:%S.%f"
+    last_timestamp_checked = datetime.datetime.strptime(last_time_checked, date_format)
+    print('##########', type(last_timestamp_checked))
     # Get the current time
-    now = datetime.now()
+    now = datetime.datetime.now()
     # Check if 24 hours have passed
-    return now >= last_check_time + datetime.timedelta(days=1)
-
+    return now >= (last_timestamp_checked + datetime.timedelta(days=1))
 
 def check_for_new_version(current_version: str=None) -> Union[str, None]:
     """ Check to see if there is a newer version and return the version string or None."""
