@@ -133,14 +133,7 @@ class VideoEventWidget(QWidget):
             self.like_clip_button.setStyleSheet("color: white;")
 
     def toggle_play_pause(self) -> None:
-        """
-        self._backup_player = media_video_players['back']
-        self._front_upper_player = media_video_players['front']
-        self._left_repeater_player = media_video_players['left']
-        self._right_repeater_player = media_video_players['right']
-        :param self:
-        :return:
-        """
+        """Handle the play/pause button being pressed."""
         if self._is_playing:
             self._backup_player.pause()
             self._front_upper_player.pause()

@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 from typing import List
+import  logging
 
 import file_utils.updates
 from constants import (
@@ -27,6 +28,9 @@ from ui.main_window_widgets import CommandButtonsRow
 
 from file_utils.settings import AppSettings
 from file_utils.updates import should_check_for_update
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -84,7 +88,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f"Tesla Dashcam Reviewer {APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
         if should_check_for_update(self._settings):
-            print('INFO: LOOKING FOR NEWER VERSIONS.')
             update_available = file_utils.updates.check_for_new_version()
             if update_available:
                 popup = InfoPopup(
@@ -167,7 +170,7 @@ class MainWindow(QMainWindow):
             long_msg = ""
             for msg in info_messages:
                 long_msg = long_msg + f'{msg}\n'
-
+            logger.warning(long_msg)
             info_popup = InfoPopup(message=long_msg, parent=self)
         else:
             info_popup = InfoPopup(message='Done copying files.', parent=self)
@@ -215,10 +218,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # if platform.system() == "Darwin":
-    #     app.setStyle("macos")
-    # else:
-    #     app.setStyle("Windows")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
