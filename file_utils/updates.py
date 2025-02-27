@@ -1,9 +1,4 @@
-import os
-from pathlib import Path
 import datetime
-import json
-import platform
-from typing import Union
 import requests
 
 from file_utils.settings import AppSettings

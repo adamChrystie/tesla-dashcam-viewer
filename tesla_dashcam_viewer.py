@@ -6,13 +6,12 @@ from typing import List
 import file_utils.updates
 from constants import (
     APP_VERSION,
-    TESLAS_CAMERA_NAMES,
-    SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE)
+    TESLAS_CAMERA_NAMES)
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
 from PySide6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,QMainWindow,
-    QFileDialog, QSizePolicy, QMessageBox)
+    QFileDialog, QSizePolicy)
 
 from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
