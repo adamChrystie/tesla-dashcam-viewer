@@ -173,7 +173,9 @@ class MainWindow(QMainWindow):
             logger.warning(long_msg)
             info_popup = InfoPopup(message=long_msg, parent=self)
         else:
-            info_popup = InfoPopup(message='Done copying files.', parent=self)
+            msg = 'Done copying files.'
+            info_popup = InfoPopup(message=msg, parent=self)
+            logger.info(msg)
         info_popup.show()
 
     def update_slider_range(self, duration: int) -> None:

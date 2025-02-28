@@ -2,8 +2,11 @@
 import datetime
 import os
 import logging
+import platform
 
-from constants import SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE
+from constants import (SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE,
+                       APP_WINDOWS_SETTINGS_FILE_NAME,
+                       APP_SETTINGS_DATA_FOLDER)
 from PySide6.QtCore import QSettings
 
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +15,15 @@ logger = logging.getLogger(__name__)
 class AppSettings(QSettings):
     """A class related to the app's settings."""
     def __init__(self, organization="atomfx.com", app_name="tesla_dashcam_viewer"):
-        super().__init__(organization, app_name)
+        if platform.system() == "Windows":
+            # Use INI format and store in the Roaming AppData directory
+            app_data_dir = os.path.join(os.environ["APPDATA"], APP_SETTINGS_DATA_FOLDER)
+            os.makedirs(app_data_dir, exist_ok=True)  # Ensure directory exists
+            settings_path = os.path.join(app_data_dir, APP_WINDOWS_SETTINGS_FILE_NAME)
+            super().__init__(settings_path, QSettings.IniFormat)
+        elif platform.platform() == 'Darwin':
+            super().__init__(organization, app_name)
+
         self.create_initial_settings_file()
         if os.path.exists(self.fileName()):
             logger.info(f'Settings file path:{self.fileName()}')
@@ -21,7 +32,7 @@ class AppSettings(QSettings):
     def create_initial_settings_file(self):
         if not os.path.exists(self.fileName()):
             now = datetime.datetime.now().isoformat()
-            logger.info(f'Setting default for setting key: {SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE}={now})')
+            logger.info(f'Creating initial settings file:{self.fileName()}')
             self.setValue(SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE, now)
             self.sync()
 

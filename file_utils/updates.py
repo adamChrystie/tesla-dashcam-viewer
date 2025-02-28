@@ -28,7 +28,7 @@ def should_check_for_update(settings: AppSettings):
     # Get the current time
     now = datetime.datetime.now()
     # Check if 24 hours have passed
-    should_check = now >= (last_timestamp_checked + datetime.timedelta(hours=0.01))
+    should_check = now >= (last_timestamp_checked + datetime.timedelta(hours=4))
     if should_check:
         logger.info(f'Updating last checked timestamp to: {now.isoformat()}')
         settings.setValue(SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE, now.isoformat())
