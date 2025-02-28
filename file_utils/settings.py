@@ -21,7 +21,7 @@ class AppSettings(QSettings):
             os.makedirs(app_data_dir, exist_ok=True)  # Ensure directory exists
             settings_path = os.path.join(app_data_dir, APP_WINDOWS_SETTINGS_FILE_NAME)
             super().__init__(settings_path, QSettings.IniFormat)
-        elif platform.platform() == 'Darwin':
+        elif platform.system() == 'Darwin':
             super().__init__(organization, app_name)
 
         self.create_initial_settings_file()
