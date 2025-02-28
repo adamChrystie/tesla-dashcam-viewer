@@ -33,7 +33,7 @@ def should_check_for_update(settings: AppSettings):
         settings.setValue(SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE, now.isoformat())
     return should_check
 
-def check_for_new_version(current_version: str=None) -> Union[str, False]:
+def check_for_new_version(current_version: str=None) -> Union[str, bool]:
     """ Check to see if there is a newer version and return the version string or None."""
     if not current_version:
         current_version = APP_VERSION
