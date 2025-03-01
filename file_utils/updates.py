@@ -13,9 +13,15 @@ from file_utils.settings import AppSettings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def should_check_for_update(settings: AppSettings):
-    """Is it time to check for available updates? App checks after 24
-    hours."""
+def should_check_for_update(settings: AppSettings, frequency: int =4) -> bool:
+    """ Is it time to query the server to see if newer versions are available.
+    Args:
+        settings (AppSettings): The app's settings object.
+        frequency (int): Check for updates N hours after the last time checked.
+
+    Returns: bool
+
+    """
     last_time_checked = settings.value(SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE)
     logger.info(f'last_time_checked:{last_time_checked}')
     # Convert the stored timestamp str to a datetime object
@@ -27,14 +33,21 @@ def should_check_for_update(settings: AppSettings):
     # Get the current time
     now = datetime.datetime.now()
     # Check if 24 hours have passed
-    should_check = now >= (last_timestamp_checked + datetime.timedelta(hours=4))
+    should_check = now >= (last_timestamp_checked + datetime.timedelta(hours=frequency))
     if should_check:
         logger.info(f'Updating last checked timestamp to: {now.isoformat()}')
         settings.setValue(SETTINGS_KEY_DATETIME_OF_LAST_CHECK_FOR_UPDATE, now.isoformat())
     return should_check
 
 def check_for_new_version(current_version: str=None) -> Union[str, bool]:
-    """ Check to see if there is a newer version and return the version string or None."""
+    """ Check to see if there is a newer version.
+
+    Args:
+        current_version (str): The current version number.
+
+    Returns: Union[str, bool]
+
+    """
     if not current_version:
         current_version = APP_VERSION
     try:
@@ -48,4 +61,3 @@ def check_for_new_version(current_version: str=None) -> Union[str, bool]:
     except (requests.RequestException, ValueError, KeyError, requests.ConnectTimeout) as e:
         logger.warning(f'Could not check for updates: {e}')
     return False
-
