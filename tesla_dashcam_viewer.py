@@ -2,8 +2,12 @@ import os
 import sys
 import shutil
 from typing import List
+import  logging
 
-from constants import TESLAS_CAMERA_NAMES
+import file_utils.updates
+from constants import (
+    APP_VERSION,
+    TESLAS_CAMERA_NAMES)
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
 from PySide6.QtWidgets import (
@@ -22,9 +26,17 @@ from ui.event_list_widget import ScrollableWidget
 from ui.video_screens import QVideoScreenGrid
 from ui.main_window_widgets import CommandButtonsRow
 
+from file_utils.settings import AppSettings
+from file_utils.updates import should_check_for_update
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        # Get App Settings
+        self._settings = AppSettings()
         self.is_dragging = False
         screen = QScreen.availableGeometry(QApplication.primaryScreen())
         self.aspect_ratio = 1.63
@@ -73,8 +85,24 @@ class MainWindow(QMainWindow):
         main_vlayout.addWidget(self.slider, stretch=False)
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
-        self.setWindowTitle("Tesla Dashcam Reviewer")
+        self.setWindowTitle(f"Tesla Dashcam Reviewer {APP_VERSION}")
         #self.setAttribute(Qt.WA_OpaquePaintEvent)
+        if should_check_for_update(self._settings):
+            update_available = file_utils.updates.check_for_new_version()
+            if update_available:
+                popup = InfoPopup(
+                    title='Update Available',
+                    message=f"A newer version {update_available} is available. You are currently " \
+                            f"running {APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
+                    parent=self)
+                popup.show()
+
+    def closeEvent(self, event):
+        """Handle cleanup when the window is closed."""
+        # Supposedly the below is not needed since QSettings objects handle writing changed
+        # settings to disk periodically and when the object is destroyed.
+        #self._settings.sync()
+        pass
 
     def resizeEvent(self, event: QEvent) -> None:
         """Resize the window.
@@ -142,10 +170,12 @@ class MainWindow(QMainWindow):
             long_msg = ""
             for msg in info_messages:
                 long_msg = long_msg + f'{msg}\n'
-
+            logger.warning(long_msg)
             info_popup = InfoPopup(message=long_msg, parent=self)
         else:
-            info_popup = InfoPopup(message='Done copying files.', parent=self)
+            msg = 'Done copying files.'
+            info_popup = InfoPopup(message=msg, parent=self)
+            logger.info(msg)
         info_popup.show()
 
     def update_slider_range(self, duration: int) -> None:
@@ -190,10 +220,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # if platform.system() == "Darwin":
-    #     app.setStyle("macos")
-    # else:
-    #     app.setStyle("Windows")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
