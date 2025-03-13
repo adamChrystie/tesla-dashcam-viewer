@@ -3,48 +3,9 @@ import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Union, List
+
 from constants import TESLAS_CAMERA_NAMES
-
-
-class VideoEventData(object):
-    """A class which describes a video event."""
-    def __init__(self):
-        self._back_fpath = None
-        self._front_fpath = None
-        self._left_repeater_fpath = None
-        self._right_repeater_fpath = None
-        self._timestamp = None
-        self._event_name = None
-        self._camera_files_dict = defaultdict(Path)
-
-    @property
-    def camera_files_dict(self) -> dict:
-        """
-        Get the dictionary mapping camera names to their video file paths.
-        Returns:
-            dict: A dictionary mapping camera names to their video file paths.
-        """
-        return self._camera_files_dict
-
-    @property
-    def timestamp(self) -> str:
-        """
-        Get the timestamp of the video event.
-        Returns:
-            str: The timestamp of the video event.
-        """
-        return self._timestamp
-
-    def update_camera_files_dict(self, video_file_paths: dict) -> None:
-        """
-        Set up mapping camera names to their video file paths.
-        Args:
-            video_file_paths (dict): A dictionary mapping camera names to their video file paths.
-        """
-        for cam_name in TESLAS_CAMERA_NAMES:
-            for video_fpath in video_file_paths:
-                if cam_name in video_fpath.name:
-                    self._camera_files_dict[cam_name] = video_fpath
+import opentimelineio as otio
 
 def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[str]:
     """
@@ -99,3 +60,73 @@ def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]) -> List[V
         event_data.update_camera_files_dict(video_file_paths)
         event_data_objs.append(event_data)
     return event_data_objs
+
+class VideoEventData(object):
+    """A class which describes a video event."""
+    def __init__(self):
+        self._back_fpath = None
+        self._front_fpath = None
+        self._left_repeater_fpath = None
+        self._right_repeater_fpath = None
+        self._timestamp = None
+        self._event_name = None
+        self._fps = 30
+        self._duration = None # We'll use front camera's duration.
+        self._camera_files_dict = defaultdict(Path)
+
+    @property
+    def camera_files_dict(self) -> dict:
+        """
+        Get the dictionary mapping camera names to their video file paths.
+        Returns:
+            dict: A dictionary mapping camera names to their video file paths.
+        """
+        return self._camera_files_dict
+
+    @property
+    def timestamp(self) -> str:
+        """
+        Get the timestamp of the video event.
+        Returns:
+            str: The timestamp of the video event.
+        """
+        return self._timestamp
+
+    def update_camera_files_dict(self, video_file_paths: dict) -> None:
+        """
+        Set up mapping camera names to their video file paths.
+        Args:
+            video_file_paths (dict): A dictionary mapping camera names to their video file paths.
+        """
+        for cam_name in TESLAS_CAMERA_NAMES:
+            for video_fpath in video_file_paths:
+                if cam_name in video_fpath.name:
+                    self._camera_files_dict[cam_name] = video_fpath
+
+class CompoundVideoEvent(object):
+    def __init__(self, sub_events):
+        self.sub_events = sub_events  # List of VideoEventData
+        self.timeline = self.create_timeline()
+
+    def create_timeline(self):
+        timeline = otio.schema.Timeline(name="Compound Event")
+        track = otio.schema.Track(
+            name="Dashcam Events", kind=otio.schema.TrackKind.Video)
+
+        for event in self.sub_events:
+            for cam, video_path in event.camera_files_dict.items():
+                clip = otio.schema.Clip(
+                    name=f"{event.timestamp}_{cam}",
+                    media_reference=otio.schema.ExternalReference(target_url=video_path.as_posix()),
+                    source_range=otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(0, 30),  # Assuming 30 FPS
+                        otio.opentime.RationalTime(10, 30)  # Dummy duration; replace with actual
+                    )
+                )
+                track.append(clip)
+
+        timeline.tracks.append(track)
+        return timeline
+
+    def get_duration(self):
+        return self.timeline.duration().to_seconds()
