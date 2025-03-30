@@ -7,7 +7,7 @@ from PySide6.QtCore import QUrl, Signal
 
 class VideoEventWidget(QWidget):
     play_pressed = Signal()
-    def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], parent: QWidget=None):
+    def __init__(self, event_name: str, media_video_players: dict, video_files: List[str], event_data, parent: QWidget=None):
         """A single multi view video event to represent a specific time.
         Args:
             event_name (str): The name of the event.
@@ -16,6 +16,7 @@ class VideoEventWidget(QWidget):
             parent (QWidget, optional): The parent widget. Defaults to None.
         """
         super().__init__(parent=parent)
+        self._event_data = event_data
         self._is_playing = False
         self._event_name = event_name
         self._liked_folder_name = None

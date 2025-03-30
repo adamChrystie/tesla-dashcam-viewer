@@ -3,7 +3,7 @@ import platform
 from typing import Union
 from PySide6.QtWidgets import QSlider, QWidget
 from PySide6.QtCore import Qt, QRect, QSize
-from PySide6.QtGui import QPainter, QColor, QSurfaceFormat, QPaintEvent
+from PySide6.QtGui import QPainter, QColor, QPaintEvent
 
 class TimelineSliderWidget(QSlider):
     def __init__(self, media_player_video_widget_dict: dict,

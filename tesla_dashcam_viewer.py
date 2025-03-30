@@ -202,19 +202,18 @@ class MainWindow(QMainWindow):
         if dir_path:
             event_data_objs = make_event_data_objects_for_a_dir_path(dir_path)
             for event_data in event_data_objs:
-                vide_files = []
+                video_files = []
                 for camera_name, video_fpath in event_data.camera_files_dict.items():
-                    vide_files.append(video_fpath.as_posix())
+                    video_files.append(video_fpath.as_posix())
                 event_name = event_data.timestamp
-                self.add_video_clip_widget(event_name, vide_files)
+                self.add_video_clip_widget(event_data)
 
-    def add_video_clip_widget(self, event_name: str, video_files: List[str]) -> None:
+    def add_video_clip_widget(self, event_data) -> None:
         """Add a video clip widget to the layout.
         Args:
-            event_name (str): The name of the event.
-            video_files (List[str]): A list of video files to play.
+            event_data (VideoEventData): Event data object
         """
-        video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
+        video_clip_widget = VideoEventWidget(event_data.timestamp, self.media_player_video_widget_dict, event_data.video_files, event_data)
         video_clip_widget.play_pressed.connect(self.pause_others)
         self.video_widget_layout.add_widget(video_clip_widget)
 
