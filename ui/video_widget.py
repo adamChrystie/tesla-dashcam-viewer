@@ -1,8 +1,9 @@
 from typing import List
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtWidgets import (
-    QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QLineEdit)
-from PySide6.QtCore import QUrl, Signal
+    QWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QLineEdit, QGraphicsOpacityEffect)
+from PySide6.QtCore import QUrl, Signal, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PySide6.QtGui import QMouseEvent
 
 
 class VideoEventWidget(QWidget):
@@ -26,6 +27,15 @@ class VideoEventWidget(QWidget):
         self._video_files = video_files
         self._is_liked = False
         self._current_playback_position = 0
+        self._is_loaded = False  # Track if video sources are loaded for lazy loading
+        
+        # Setup smooth hover animations
+        self._opacity_effect = QGraphicsOpacityEffect()
+        self.setGraphicsEffect(self._opacity_effect)
+        self._hover_animation = QPropertyAnimation(self._opacity_effect, b"opacity")
+        self._hover_animation.setDuration(160)  # 160ms transition
+        self._hover_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        
         self.setup_ui()
         self.setup_connections()
 
@@ -144,10 +154,9 @@ class VideoEventWidget(QWidget):
         else:
             self.play_pressed.emit()
             self.play_pause_button.setText("Pause")
-            self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
-            self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
-            self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
-            self._right_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[3]))
+            # Lazy load video sources when first played
+            if not self._is_loaded:
+                self._load_video_sources()
             self._backup_player.setPosition(self._current_playback_position)
             self._front_upper_player.setPosition(self._current_playback_position)
             self._left_repeater_player.setPosition(self._current_playback_position)
@@ -158,8 +167,40 @@ class VideoEventWidget(QWidget):
             self._right_repeater_player.play()
         self._is_playing = not self._is_playing
 
+    def _load_video_sources(self) -> None:
+        """Lazy load video sources to improve startup performance."""
+        if not self._is_loaded and len(self._video_files) >= 4:
+            self._backup_player.setSource(QUrl.fromLocalFile(self._video_files[0]))
+            self._front_upper_player.setSource(QUrl.fromLocalFile(self._video_files[1]))
+            self._left_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[2]))
+            self._right_repeater_player.setSource(QUrl.fromLocalFile(self._video_files[3]))
+            self._is_loaded = True
+
+    def enterEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse enter for smooth hover effect."""
+        self._hover_animation.setStartValue(0.7)
+        self._hover_animation.setEndValue(1.0)
+        self._hover_animation.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse leave for smooth hover effect."""
+        self._hover_animation.setStartValue(1.0)
+        self._hover_animation.setEndValue(0.9)
+        self._hover_animation.start()
+        super().leaveEvent(event)
+
+    def _cleanup_media_sources(self) -> None:
+        """Clean up media sources to free memory when not in use."""
+        if not self._is_playing:
+            self._backup_player.setSource("")
+            self._front_upper_player.setSource("")
+            self._left_repeater_player.setSource("")
+            self._right_repeater_player.setSource("")
+            self._is_loaded = False
+
     def set_style(self) -> None:
-        """Apply a stylesheet."""
+        """Apply a stylesheet with optimized animations and visual feedback."""
         qml = """
         QWidget {
                 font-size: 14px;
@@ -168,20 +209,41 @@ class VideoEventWidget(QWidget):
                 border-radius: 4px;
                 border: 0px solid #d0d0d0;
                 padding: 4px 0px;
+                /* Optimize for smoother rendering */
+            }
+        QWidget:hover {
+                background-color: #f8f8f8;
             }
         QLabel {
             background-color: #0078d7;
             color: white;
+            border-radius: 3px;
+            padding: 2px 6px;
         }
         QPushButton {
             background-color: #0078d7;
             color: white;
+            border-radius: 3px;
+            padding: 4px 8px;
+            border: none;
+            font-weight: 500;
         }
         QPushButton:hover {
             background-color: #005bb5;
+            transform: translateY(-1px);
+        }
+        QPushButton:pressed {
+            background-color: #004494;
+            transform: translateY(0px);
         }
         QLineEdit { 
             color: black;
+            border: 1px solid #d0d0d0;
+            border-radius: 3px;
+            padding: 2px 4px;
+        }
+        QLineEdit:focus {
+            border: 2px solid #0078d7;
         }
         """
         self.setStyleSheet(qml)
