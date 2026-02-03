@@ -1,8 +1,10 @@
 """Module related to handling video events on disk."""
+
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Union, List
+from typing import Dict, List, Union
+
 from constants import TESLAS_CAMERA_NAMES
 
 
@@ -15,10 +17,10 @@ class VideoEventData(object):
         self._right_repeater_fpath = None
         self._timestamp = None
         self._event_name = None
-        self._camera_files_dict = defaultdict(Path)
+        self._camera_files_dict: Dict[str, Path] = {}
 
     @property
-    def camera_files_dict(self) -> dict:
+    def camera_files_dict(self) -> Dict[str, Path]:
         """
         Get the dictionary mapping camera names to their video file paths.
         Returns:
@@ -35,24 +37,29 @@ class VideoEventData(object):
         """
         return self._timestamp
 
-    def update_camera_files_dict(self, video_file_paths: dict) -> None:
+    def update_camera_files_dict(self, video_file_paths: List[Path]) -> None:
         """
         Set up mapping camera names to their video file paths.
         Args:
-            video_file_paths (dict): A dictionary mapping camera names to their video file paths.
+            video_file_paths (List[Path]): A list of video file paths for a single event.
         """
         for cam_name in TESLAS_CAMERA_NAMES:
             for video_fpath in video_file_paths:
                 if cam_name in video_fpath.name:
                     self._camera_files_dict[cam_name] = video_fpath
+                    break
 
-def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[str]:
+    def missing_camera_names(self) -> List[str]:
+        """Return camera names that are missing for this event."""
+        return [cam for cam in TESLAS_CAMERA_NAMES if cam not in self._camera_files_dict]
+
+def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[Path]:
     """
     Given a directory return all the mp4 files in the directory & subdirectories.
     Args:
         dir_path (Path|str): A parent directory path to start searching from.
     Returns:
-        list of str: A list of file paths.
+        List[Path]: A list of file paths.
     """
     if isinstance(dir_path, str):
         dir_path = Path(dir_path)
@@ -61,17 +68,17 @@ def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[str]:
         files.append(f)
     return files
 
-def group_videos_by_timestamp(fpath_list: List[str]) -> dict:
+def group_videos_by_timestamp(fpath_list: List[Path]) -> Dict[str, List[Path]]:
     """
     Groups video files based on their starting timestamp in the filename.
     Args:
-        file_list (list of str): List of video file names.
+        fpath_list (List[Path]): List of video file paths.
     Returns:
-        dict: A dictionary where the keys are timestamps and values are lists of files.
+        Dict[str, List[Path]]: keys are timestamps and values are lists of file paths.
     """
     # Regular expression to extract the timestamp at the start of the filename
     timestamp_pattern = re.compile(r'^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})')
-    grouped_files = defaultdict(list)
+    grouped_files: Dict[str, List[Path]] = defaultdict(list)
     for f_path in fpath_list:
         file_name = f_path.name
         match = timestamp_pattern.match(file_name)

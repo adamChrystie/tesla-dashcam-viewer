@@ -200,13 +200,37 @@ class MainWindow(QMainWindow):
         file_dialog = QFileDialog(self)
         dir_path = file_dialog.getExistingDirectory()
         if dir_path:
-            event_data_objs = make_event_data_objects_for_a_dir_path(dir_path)
+            event_data_objs = sorted(
+                make_event_data_objects_for_a_dir_path(dir_path),
+                key=lambda e: e.timestamp,
+            )
+
+            skipped_events: list[tuple[str, list[str]]] = []
             for event_data in event_data_objs:
-                vide_files = []
-                for camera_name, video_fpath in event_data.camera_files_dict.items():
-                    vide_files.append(video_fpath.as_posix())
+                missing = event_data.missing_camera_names()
+                if missing:
+                    skipped_events.append((event_data.timestamp, missing))
+                    continue
+
+                video_files = [
+                    event_data.camera_files_dict[camera_name].as_posix()
+                    for camera_name in self._camera_names
+                ]
                 event_name = event_data.timestamp
-                self.add_video_clip_widget(event_name, vide_files)
+                self.add_video_clip_widget(event_name, video_files)
+
+            if skipped_events:
+                sample = skipped_events[:8]
+                lines = [
+                    f"Skipped {len(skipped_events)} incomplete event(s) (missing one or more camera angles).",
+                    "",
+                    "Examples:",
+                ]
+                for ts, missing_names in sample:
+                    lines.append(f"- {ts}: missing {', '.join(missing_names)}")
+                if len(skipped_events) > len(sample):
+                    lines.append("- …")
+                InfoPopup(title="Incomplete Events", message="\n".join(lines), parent=self).show()
 
     def add_video_clip_widget(self, event_name: str, video_files: List[str]) -> None:
         """Add a video clip widget to the layout.
