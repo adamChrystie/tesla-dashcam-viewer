@@ -23,6 +23,7 @@ class TimelineSliderWidget(QSlider):
         self.arrow_key_pressed = False
         self.media_player_video_widget_dict = media_player_video_widget_dict
         self.main_player = media_player_video_widget_dict['front']['media_player']
+        self._players_playing_before_drag: dict[str, bool] = {}
         self.setup_ui()
         self.setup_connections()
 
@@ -43,20 +44,26 @@ class TimelineSliderWidget(QSlider):
     def on_slider_pressed(self) -> None:
         """Pause video when slider is pressed."""
         self.is_dragging = True
+        self._players_playing_before_drag = {}
         for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
-            media_player = self.media_player_video_widget_dict[camera_name]['media_player']
+            media_player = widgets_dict['media_player']
+            self._players_playing_before_drag[camera_name] = (
+                media_player.playbackState() == media_player.PlaybackState.PlayingState
+            )
             media_player.pause()
 
     def on_slider_released(self) -> None:
         """Resume video when slider is released."""
         self.is_dragging = False
         duration = self.main_player.duration()  # Total video duration in milliseconds
-        if duration:
-            # Map the slider value to the video's position in milliseconds
-            new_position = int(self.value())
-            for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
-                media_player = self.media_player_video_widget_dict[camera_name]['media_player']
-                media_player.setPosition(new_position)  # Seek to new position
+        if not duration:
+            return
+
+        new_position = int(self.value())
+        for camera_name, widgets_dict in self.media_player_video_widget_dict.items():
+            media_player = widgets_dict['media_player']
+            media_player.setPosition(new_position)
+            if self._players_playing_before_drag.get(camera_name, False):
                 media_player.play()
 
     def on_slider_moved(self, position: int) -> None:
