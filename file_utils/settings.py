@@ -112,4 +112,3 @@ class AppSettings(QSettings):
 
         """
         super().sync()
-

@@ -10,6 +10,7 @@ from constants import TESLAS_CAMERA_NAMES
 
 class VideoEventData(object):
     """A class which describes a video event."""
+
     def __init__(self):
         self._back_fpath = None
         self._front_fpath = None
@@ -51,7 +52,10 @@ class VideoEventData(object):
 
     def missing_camera_names(self) -> List[str]:
         """Return camera names that are missing for this event."""
-        return [cam for cam in TESLAS_CAMERA_NAMES if cam not in self._camera_files_dict]
+        return [
+            cam for cam in TESLAS_CAMERA_NAMES if cam not in self._camera_files_dict
+        ]
+
 
 def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[Path]:
     """
@@ -64,9 +68,10 @@ def get_all_videos_in_dir(dir_path: Union[Path, str]) -> List[Path]:
     if isinstance(dir_path, str):
         dir_path = Path(dir_path)
     files = []
-    for f in dir_path.glob('**/*.mp4'):
+    for f in dir_path.glob("**/*.mp4"):
         files.append(f)
     return files
+
 
 def group_videos_by_timestamp(fpath_list: List[Path]) -> Dict[str, List[Path]]:
     """
@@ -77,7 +82,7 @@ def group_videos_by_timestamp(fpath_list: List[Path]) -> Dict[str, List[Path]]:
         Dict[str, List[Path]]: keys are timestamps and values are lists of file paths.
     """
     # Regular expression to extract the timestamp at the start of the filename
-    timestamp_pattern = re.compile(r'^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})')
+    timestamp_pattern = re.compile(r"^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")
     grouped_files: Dict[str, List[Path]] = defaultdict(list)
     for f_path in fpath_list:
         file_name = f_path.name
@@ -87,7 +92,10 @@ def group_videos_by_timestamp(fpath_list: List[Path]) -> Dict[str, List[Path]]:
             grouped_files[timestamp].append(f_path)
     return dict(grouped_files)
 
-def make_event_data_objects_for_a_dir_path(dir_path: Union[Path, str]) -> List[VideoEventData]:
+
+def make_event_data_objects_for_a_dir_path(
+    dir_path: Union[Path, str],
+) -> List[VideoEventData]:
     """
     Given a directory, make a list of event data objects for each timestamp event. Subdirectories
     are also searched for events.

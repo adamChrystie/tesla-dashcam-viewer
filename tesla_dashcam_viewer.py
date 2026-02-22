@@ -2,17 +2,21 @@ import os
 import sys
 import shutil
 from typing import List
-import  logging
+import logging
 
 import file_utils.updates
-from constants import (
-    APP_VERSION,
-    TESLAS_CAMERA_NAMES)
+from constants import APP_VERSION, TESLAS_CAMERA_NAMES
 from file_utils.video_events import make_event_data_objects_for_a_dir_path
 
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QHBoxLayout, QVBoxLayout,QMainWindow,
-    QFileDialog, QSizePolicy)
+    QApplication,
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QMainWindow,
+    QFileDialog,
+    QSizePolicy,
+)
 
 from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -31,6 +35,7 @@ from file_utils.updates import should_check_for_update
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -68,11 +73,14 @@ class MainWindow(QMainWindow):
             media_player.setAudioOutput(audio_output)
             media_player.setVideoOutput(video_widget)
             self.media_player_video_widget_dict[camera_name] = {
-                'video_widget': video_widget, 'media_player': media_player, 'audio_output': audio_output}
+                "video_widget": video_widget,
+                "media_player": media_player,
+                "audio_output": audio_output,
+            }
 
         # Playback slider
         self.slider = TimelineSliderWidget(self.media_player_video_widget_dict)
-        self._main_player = self.media_player_video_widget_dict['front']['media_player']
+        self._main_player = self.media_player_video_widget_dict["front"]["media_player"]
         self._main_player.positionChanged.connect(self.update_slider)
         self._main_player.durationChanged.connect(self.update_slider_range)
 
@@ -86,22 +94,23 @@ class MainWindow(QMainWindow):
         main_widget.setLayout(main_vlayout)
         self.setCentralWidget(main_widget)
         self.setWindowTitle(f"Tesla Dashcam Reviewer {APP_VERSION}")
-        #self.setAttribute(Qt.WA_OpaquePaintEvent)
+        # self.setAttribute(Qt.WA_OpaquePaintEvent)
         if should_check_for_update(self._settings):
             update_available = file_utils.updates.check_for_new_version()
             if update_available:
                 popup = InfoPopup(
-                    title='Update Available',
-                    message=f"A newer version {update_available} is available. You are currently " \
-                            f"running {APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
-                    parent=self)
+                    title="Update Available",
+                    message=f"A newer version {update_available} is available. You are currently "
+                    f"running {APP_VERSION}.\nGet the new version at \nhttps://www.adamchrystie.com/tesla_dashcam_viewer.html",
+                    parent=self,
+                )
                 popup.show()
 
     def closeEvent(self, event):
         """Handle cleanup when the window is closed."""
         # Supposedly the below is not needed since QSettings objects handle writing changed
         # settings to disk periodically and when the object is destroyed.
-        #self._settings.sync()
+        # self._settings.sync()
         pass
 
     def resizeEvent(self, event: QEvent) -> None:
@@ -125,13 +134,13 @@ class MainWindow(QMainWindow):
             if isinstance(widget, VideoEventWidget):
                 if widget != sender and widget.play_pause_button.text() == "Pause":
                     widget.play_pause_button.click()  # Trigger a pause
-                    break # We only can have one actively playing VideoEventWidget. Exiting the loop dramatically
-                          # increases ui responsiveness. Verified via testing.
+                    break  # We only can have one actively playing VideoEventWidget. Exiting the loop dramatically
+                    # increases ui responsiveness. Verified via testing.
 
     def pause_all_media_players(self) -> None:
         """Pause all the media players."""
         for widgets_dict in self.media_player_video_widget_dict.values():
-            widgets_dict['media_player'].pause()
+            widgets_dict["media_player"].pause()
 
     def copy_liked_videos(self) -> None:
         """Copy the liked videos to a specified directory."""
@@ -150,8 +159,8 @@ class MainWindow(QMainWindow):
             for widget in video_widgets:
                 event_name = widget.event_name
                 if widget.liked_folder_name_widget.text() != "":
-                    event_tag = widget.liked_folder_name_widget.text().replace(' ','-')
-                    event_name = f'{event_name}_{event_tag}'
+                    event_tag = widget.liked_folder_name_widget.text().replace(" ", "-")
+                    event_name = f"{event_name}_{event_tag}"
                 for src_fpath in widget.video_files:
                     f_name = os.path.basename(src_fpath)
                     dst_dir_path = os.path.join(dir_path, event_name)
@@ -161,19 +170,19 @@ class MainWindow(QMainWindow):
                         dst_fpath = os.path.join(dst_dir_path, f_name)
                         shutil.copy2(src_fpath, dst_fpath)
                     except OSError:
-                        msg = f'There was an error copying file to {dst_dir_path} .'
+                        msg = f"There was an error copying file to {dst_dir_path} ."
                         info_messages.append((msg))
                         break
 
         if info_messages:
-            info_messages.insert(0, 'Done copying videos but there were some issues.')
+            info_messages.insert(0, "Done copying videos but there were some issues.")
             long_msg = ""
             for msg in info_messages:
-                long_msg = long_msg + f'{msg}\n'
+                long_msg = long_msg + f"{msg}\n"
             logger.warning(long_msg)
             info_popup = InfoPopup(message=long_msg, parent=self)
         else:
-            msg = 'Done copying files.'
+            msg = "Done copying files."
             info_popup = InfoPopup(message=msg, parent=self)
             logger.info(msg)
         info_popup.show()
@@ -230,7 +239,9 @@ class MainWindow(QMainWindow):
                     lines.append(f"- {ts}: missing {', '.join(missing_names)}")
                 if len(skipped_events) > len(sample):
                     lines.append("- …")
-                InfoPopup(title="Incomplete Events", message="\n".join(lines), parent=self).show()
+                InfoPopup(
+                    title="Incomplete Events", message="\n".join(lines), parent=self
+                ).show()
 
     def add_video_clip_widget(self, event_name: str, video_files: List[str]) -> None:
         """Add a video clip widget to the layout.
@@ -238,9 +249,12 @@ class MainWindow(QMainWindow):
             event_name (str): The name of the event.
             video_files (List[str]): A list of video files to play.
         """
-        video_clip_widget = VideoEventWidget(event_name, self.media_player_video_widget_dict, video_files)
+        video_clip_widget = VideoEventWidget(
+            event_name, self.media_player_video_widget_dict, video_files
+        )
         video_clip_widget.play_pressed.connect(self.pause_others)
         self.video_widget_layout.add_widget(video_clip_widget)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
